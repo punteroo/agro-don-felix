@@ -1,0 +1,27 @@
+/* PrimeReact theme (Lara Green – clean, professional, agri-appropriate) */
+@import 'primereact/resources/themes/lara-light-green/theme.css';
+@import 'primereact/resources/primereact.min.css';
+@import 'primeicons/primeicons.css';
+@import 'primeflex/primeflex.css';
+
+/* ── Global resets ──────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  background-color: #f0f4f0;
+}
+
+/* Slightly larger base font for non-technical users */
+body {
+  font-size: 15px;
+}

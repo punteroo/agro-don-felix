@@ -1,0 +1,41 @@
+appId: com.agrodonfelix.app
+productName: Agro Don Félix
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml,yarn.lock}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asarUnpack:
+  # better-sqlite3 is a native module — it must be unpacked from the ASAR archive
+  - resources/**
+  - node_modules/better-sqlite3/**
+  - node_modules/bindings/**
+  - node_modules/file-uri-to-path/**
+win:
+  executableName: AgroDonFelix
+  icon: build/icon.ico
+  # Target both an NSIS installer and a portable single-file exe
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+nsis:
+  artifactName: AgroDonFelix-${version}-instalador.exe
+  shortcutName: Agro Don Félix
+  uninstallDisplayName: Agro Don Félix
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+portable:
+  artifactName: AgroDonFelix-${version}-portable.exe
+npmRebuild: false
+publish:
+  provider: generic
+  url: https://example.com/auto-updates
+
