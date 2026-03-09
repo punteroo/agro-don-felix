@@ -5,7 +5,17 @@ export function registerLotesHandlers(): void {
   const db = getDb()
 
   ipcMain.handle('lotes:getAll', () => {
-    return db.prepare('SELECT * FROM lotes ORDER BY nombre ASC').all()
+    return db
+      .prepare(
+        `SELECT l.*,
+                COUNT(c.id) AS cosecha_count,
+                COALESCE(SUM(c.rendimiento * l.superficie_ha / 1000.0), 0) AS produccion_total_tn
+         FROM   lotes l
+         LEFT   JOIN cosechas c ON c.lote_id = l.id
+         GROUP  BY l.id
+         ORDER  BY l.nombre ASC`
+      )
+      .all()
   })
 
   ipcMain.handle(

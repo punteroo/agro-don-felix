@@ -13,7 +13,7 @@ export const lotesService = {
   getAll: () => window.api.lotesGetAll(),
   create: (payload: { nombre: string; ubicacion?: string; superficie_ha: number }) =>
     window.api.lotesCreate(payload),
-  update: (id: number, payload: Parameters<typeof window.api.lotesUpdate>[1]) =>
+  update: (id: number, payload: Partial<{ nombre: string; ubicacion: string; superficie_ha: number }>) =>
     window.api.lotesUpdate(id, payload),
   delete: (id: number) => window.api.lotesDelete(id)
 }

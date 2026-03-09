@@ -16,6 +16,12 @@ export interface Lote {
   superficie_ha: number
 }
 
+/** Lote as returned by lotes:getAll — includes aggregate stats from cosechas. */
+export interface LoteRow extends Lote {
+  cosecha_count: number
+  produccion_total_tn: number
+}
+
 export interface CosechaPayload {
   lote_id: number
   cultivo_id: number

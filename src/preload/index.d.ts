@@ -7,7 +7,7 @@ export interface AppAPI {
   cultivosDelete: (id: number) => Promise<{ success: boolean }>
 
   // Lotes
-  lotesGetAll: () => Promise<Lote[]>
+  lotesGetAll: () => Promise<LoteRow[]>
   lotesCreate: (payload: { nombre: string; ubicacion?: string; superficie_ha: number }) => Promise<Lote>
   lotesUpdate: (id: number, payload: Partial<Lote>) => Promise<Lote>
   lotesDelete: (id: number) => Promise<{ success: boolean }>
@@ -37,6 +37,11 @@ export interface Lote {
   nombre: string
   ubicacion?: string
   superficie_ha: number
+}
+
+export interface LoteRow extends Lote {
+  cosecha_count: number
+  produccion_total_tn: number
 }
 
 export interface CosechaPayload {
