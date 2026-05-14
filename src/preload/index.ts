@@ -34,6 +34,7 @@ const api = {
   // ── Precios ─────────────────────────────────────────────────────────────
   preciosGetAll: () => ipcRenderer.invoke('precios:getAll'),
   preciosGetLatest: () => ipcRenderer.invoke('precios:getLatest'),
+  preciosDelete: (id: number) => ipcRenderer.invoke('precios:delete', id),
   preciosUpsert: (payload: {
     cultivo_id: number
     precio_ton: number

@@ -31,6 +31,7 @@ export const cosechasService = {
 export const preciosService = {
   getAll: () => window.api.preciosGetAll(),
   getLatest: () => window.api.preciosGetLatest(),
+  delete: (id: number) => window.api.preciosDelete(id),
   upsert: (payload: Parameters<typeof window.api.preciosUpsert>[0]) =>
     window.api.preciosUpsert(payload)
 }

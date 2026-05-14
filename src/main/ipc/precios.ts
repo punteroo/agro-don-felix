@@ -31,10 +31,15 @@ export function registerPreciosHandlers(): void {
       .all()
   })
 
+  /** Delete a price entry by its primary key. */
+  ipcMain.handle('precios:delete', (_e, id: number) => {
+    db.prepare('DELETE FROM precios_cache WHERE id = ?').run(id)
+    return { success: true }
+  })
+
   /**
-   * Upsert a price entry. Called after fetching from external API (MATba-ROFEX).
-   * The renderer fetches the remote data (it has network access in Electron) and
-   * passes the result here to persist it.
+   * Upsert a price entry. Called when registering a price manually or after
+   * fetching from an external source.
    */
   ipcMain.handle(
     'precios:upsert',

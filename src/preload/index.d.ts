@@ -22,6 +22,7 @@ export interface AppAPI {
   // Precios
   preciosGetAll: () => Promise<PrecioCacheRow[]>
   preciosGetLatest: () => Promise<PrecioCacheRow[]>
+  preciosDelete: (id: number) => Promise<{ success: boolean }>
   preciosUpsert: (payload: PrecioPayload) => Promise<PrecioCacheRow>
 }
 
