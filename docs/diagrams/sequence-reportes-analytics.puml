@@ -1,0 +1,101 @@
+@startuml sequence-reportes-analytics
+title Secuencia: Carga y cálculo analítico de Reportes
+
+skinparam sequenceArrowThickness 1.5
+skinparam shadowing false
+
+actor Usuario as U
+participant "Reportes\n(Page)" as Page
+participant "window.api\n(Preload Bridge)" as API
+participant "Handlers\n(Main Process)" as Handler
+database "SQLite" as DB
+
+== Carga inicial ==
+
+activate Page
+Page -> Page : setLoading(true)
+
+note over Page, DB
+  Cuatro consultas en paralelo con Promise.all()
+end note
+
+par Cosechas
+  Page -> API  : cosechasGetAll()
+  API  -> Handler : IPC 'cosechas:getAll'
+  Handler -> DB : SELECT c.*, l.nombre, l.superficie_ha,\ncu.nombre FROM cosechas c JOIN lotes l JOIN cultivos cu
+  DB --> Handler  : CosechaRow[]
+  Handler --> API : CosechaRow[]
+  API --> Page    : cosechas[]
+and Cultivos (para filtros)
+  Page -> API  : cultivosGetAll()
+  API  -> Handler : IPC 'cultivos:getAll'
+  Handler -> DB   : SELECT * FROM cultivos
+  DB --> Handler  : Cultivo[]
+  Handler --> API : Cultivo[]
+  API --> Page    : cultivos[]
+and Lotes (para filtros)
+  Page -> API  : lotesGetAll()
+  API  -> Handler : IPC 'lotes:getAll'
+  Handler -> DB   : SELECT l.*, COUNT(c.id), SUM(...)\nFROM lotes l LEFT JOIN cosechas c
+  DB --> Handler  : LoteRow[]
+  Handler --> API : LoteRow[]
+  API --> Page    : lotes[]
+and Historial completo de precios
+  Page -> API  : preciosGetAll()
+  API  -> Handler : IPC 'precios:getAll'
+  Handler -> DB   : SELECT p.*, c.nombre FROM precios_cache p\nJOIN cultivos c ORDER BY fecha_precio DESC
+  DB --> Handler  : PrecioCacheRow[]
+  Handler --> API : PrecioCacheRow[]
+  API --> Page    : precios[]
+end
+
+Page -> Page : setLoading(false)
+deactivate Page
+
+== Cálculo analítico (en renderer, sin IPC) ==
+
+activate Page
+
+note over Page
+  Todos los cálculos son derivados en memoria
+  mediante useMemo(). No hay consultas adicionales.
+end note
+
+Page -> Page : latestPrecioMap ← primer precio por cultivo_id\n(precios ya vienen ordenados DESC)
+
+Page -> Page : filtered ← cosechas filtradas por\ncultivo, lote y temporada seleccionados
+
+Page -> Page : completedFiltered ← filtered donde rendimiento > 0
+
+Page -> Page : buildProduccionPorTemporada(filtered)\n→ agrupado por temporada × cultivo, suma tn
+
+Page -> Page : buildValorPorCultivo(filtered, latestPrecioMap)\n→ suma (rendimiento × ha / 1000 × precio) por cultivo
+
+Page -> Page : buildRendimientoPorLote(filtered)\n→ promedio de rendimiento por lote × cultivo
+
+Page -> Page : buildPrecioHistory(precios)\n→ agrupado por fecha_precio con cultivo_nombre como clave
+
+Page -> Page : buildProyecciones(filtered, cosechas, latestPrecioMap)\n  para cada cosecha con rendimiento=0 y sin fecha_cosecha:\n  1. busca historial del mismo cultivo en el mismo lote\n  2. si no hay, usa promedio general del cultivo\n  3. estTn = avgRend × superficie_ha / 1000\n  4. estValor = estTn × latestPrecio
+
+Page --> U : renderiza gráficos + tarjetas de proyección + preview colapsado
+
+deactivate Page
+
+== Filtrado interactivo ==
+
+U -> Page : cambia filtro (cultivo / lote / temporada)
+activate Page
+Page -> Page : recalcula filtered y todos los\ndatos de gráficos vía useMemo()
+Page --> U : actualiza gráficos sin nueva consulta
+deactivate Page
+
+== Exportación a Excel ==
+
+U -> Page : click "Exportar a Excel"
+activate Page
+Page -> Page : usa completedFiltered (excluye en curso)\ncontruye detailData[] + summaryData[]
+Page -> Page : xlsx.writeFile(workbook, filename)
+Page --> U : archivo .xlsx descargado
+deactivate Page
+
+@enduml
