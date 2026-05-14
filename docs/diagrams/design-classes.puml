@@ -159,8 +159,24 @@ package "Proceso Renderer (React / Vite)" {
       - filterCultivoId: number | null
       - filterLoteId: number | null
       - filterTemporada: string
+      - previewOpen: boolean
       + handleExport(): void
     }
+
+    class AnalyticsEngine <<utility>> {
+      + buildProduccionPorTemporada(rows): TemporadaBar[]
+      + buildValorPorCultivo(rows, precioMap): ValorPie[]
+      + buildRendimientoPorLote(rows): LoteBar[]
+      + buildPrecioHistory(precios): PrecioPoint[]
+      + buildProyecciones(filtered, history, precioMap): ProyeccionRow[]
+    }
+
+    note on link
+      Funciones puras definidas en el módulo;
+      invocadas por Reportes vía useMemo()
+    end note
+
+    Reportes ..> AnalyticsEngine : deriva gráficos en memoria
   }
 
   package "components" {

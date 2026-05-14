@@ -71,11 +71,29 @@ _[Diagrama: sequence-crear-cosecha]_
 
 Este diagrama ilustra el flujo completo desde que el usuario abre el formulario de nueva cosecha hasta que el registro es persistido y la tabla se actualiza. El punto de mayor interés es la transición del renderer al proceso principal a través del canal IPC: desde la perspectiva del renderer, la operación es una llamada a promesa; en el proceso principal, es una consulta sincrónica a SQLite. El diagrama también muestra el manejo de la validación: si los campos obligatorios no están completos, el formulario permanece abierto y muestra mensajes de error sin invocar el IPC.
 
+#### Diagrama de secuencia: carga analítica de Reportes
+
+_[Diagrama: sequence-reportes-analytics]_
+
+La página de Reportes combina cuatro consultas paralelas (cosechas, cultivos, lotes, historial completo de precios) con un motor de cálculo que opera íntegramente en memoria mediante `useMemo()`. Una vez recibidos los datos, se ejecutan cinco funciones puras que producen las estructuras de datos necesarias para cada visualización:
+
+- **Producción por temporada**: agrupa las cosechas completadas por temporada y cultivo, acumulando la producción en toneladas. El resultado alimenta un gráfico de barras agrupadas que permite comparar campañas históricas.
+
+- **Valor estimado por cultivo**: cruza la producción de cada cosecha con el último precio de referencia registrado para ese cultivo y acumula el valor en pesos por tipo de grano. El resultado alimenta un gráfico de dona que expresa la distribución económica del portfolio.
+
+- **Rendimiento promedio por lote**: calcula el promedio histórico de rendimiento (kg/ha) para cada combinación lote–cultivo presente en los datos filtrados. El resultado alimenta un gráfico de barras horizontales que facilita la comparación entre lotes para cada cultivo.
+
+- **Historial de precios**: agrupa todos los registros de `precios_cache` por fecha de cotización y cultivo. El resultado alimenta un gráfico de líneas multiserie que muestra la evolución mensual de precios en el período registrado.
+
+- **Proyección de campaña en curso**: identifica las cosechas registradas con `rendimiento = 0` y sin `fecha_cosecha`, que representan implantaciones cuya cosecha aún no se ha producido. Para cada una, estima el rendimiento probable a partir del historial de ese cultivo en el mismo lote; si no existe historial para ese lote, usa el promedio general del cultivo. Multiplica el rendimiento estimado por la superficie del lote y por el último precio registrado para obtener el valor proyectado. El resultado se presenta como tarjetas de proyección individuales, indicando la fuente del estimado (historial del lote o promedio general).
+
+Todos los cálculos se recalculan automáticamente cuando el usuario modifica los filtros activos, sin generar nuevas consultas a SQLite. La vista previa de datos tabulares es colapsable (oculta por defecto) para no distraer de las visualizaciones; el botón de exportación permanece siempre visible sobre el panel colapsable.
+
 #### Diagrama de secuencia: exportación a Excel
 
 _[Diagrama: sequence-export-excel]_
 
-La exportación a Excel es una operación completamente del lado del renderer: los datos ya se encuentran en memoria desde la carga inicial de la página. El diagrama refleja que no hay nueva consulta a SQLite en el momento de exportar; en cambio, los datos son filtrados en memoria según los criterios seleccionados por el usuario y procesados por la biblioteca `xlsx` para producir el archivo. Esto garantiza que la exportación sea instantánea incluso con grandes volúmenes de datos.
+La exportación a Excel es una operación completamente del lado del renderer: los datos ya se encuentran en memoria desde la carga inicial de la página. El diagrama refleja que no hay nueva consulta a SQLite en el momento de exportar; en cambio, los datos son filtrados en memoria según los criterios seleccionados por el usuario y procesados por la biblioteca `xlsx` para producir el archivo. La exportación utiliza exclusivamente las cosechas completadas (aquellas con `rendimiento > 0`), excluyendo las implantaciones en curso para evitar producir un reporte con filas de producción nula. Esto garantiza que la exportación sea instantánea incluso con grandes volúmenes de datos.
 
 #### Diagrama de secuencia: carga del panel principal
 

@@ -2,6 +2,7 @@ import Database from 'better-sqlite3'
 import { app } from 'electron'
 import { join } from 'path'
 import { CREATE_TABLES_SQL, SEED_CULTIVOS_SQL } from './schema'
+import { seedDevData } from './seed-dev'
 
 let _db: Database.Database | null = null
 
@@ -19,6 +20,8 @@ export function getDb(): Database.Database {
   // Run schema creation (idempotent)
   _db.exec(CREATE_TABLES_SQL)
   _db.exec(SEED_CULTIVOS_SQL)
+
+  if (!app.isPackaged) seedDevData(_db)
 
   return _db
 }
