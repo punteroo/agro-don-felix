@@ -1,0 +1,47 @@
+@startuml state-precio-form
+title Diagrama de Estado — PrecioFormDialog
+
+skinparam shadowing false
+skinparam stateFontSize 12
+
+[*] --> Cerrado
+
+Cerrado --> Abierto : usuario presiona "Registrar precio"
+
+state Abierto {
+  [*] --> IngresoData
+
+  IngresoData : campos en blanco / valores por defecto
+  IngresoData : fuente = "MATba-ROFEX"
+  IngresoData : fecha = hoy
+
+  IngresoData --> Validando : usuario presiona "Guardar"
+
+  Validando --> ErrorValidacion : faltan campos obligatorios\no precio <= 0
+  Validando --> Guardando       : todos los campos válidos
+
+  ErrorValidacion --> IngresoData : usuario corrige campos
+
+  Guardando : muestra spinner en botón "Guardando…"
+  Guardando : botón deshabilitado
+
+  Guardando --> Exito  : preciosService.upsert() resuelve OK
+  Guardando --> ErrorGuardado : preciosService.upsert() rechaza
+
+  ErrorGuardado --> IngresoData : Toast de error mostrado\n(diálogo permanece abierto)
+
+  Exito --> [*] : diálogo se cierra
+}
+
+Abierto --> Cerrado : usuario presiona "Cancelar"
+Abierto --> Cerrado : usuario presiona X (header)
+
+Cerrado --> [*]
+
+note right of Guardando
+  El estado Guardando impide doble envío:
+  el botón se deshabilita hasta que la
+  promesa se resuelva o rechace.
+end note
+
+@enduml

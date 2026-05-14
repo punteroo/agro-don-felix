@@ -1,0 +1,211 @@
+@startuml design-classes
+title Diagrama de Clases de Diseño — Agro Don Félix
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype ortho
+
+' ── Main Process ─────────────────────────────────────────────────────────────
+
+package "Proceso Principal (Node.js / Electron Main)" {
+
+  class DatabaseManager <<singleton>> {
+    - db: Database
+    + initialize(): void
+    + getDb(): Database
+    + close(): void
+  }
+
+  class CultivosHandler {
+    + register(): void
+    - handleGetAll(): Cultivo[]
+    - handleCreate(nombre): Cultivo
+    - handleDelete(id): Result
+  }
+
+  class LotesHandler {
+    + register(): void
+    - handleGetAll(): LoteRow[]
+    - handleCreate(payload): Lote
+    - handleUpdate(id, payload): Lote
+    - handleDelete(id): Result
+  }
+
+  class CosechasHandler {
+    + register(): void
+    - handleGetAll(): CosechaRow[]
+    - handleGetById(id): CosechaRow
+    - handleCreate(payload): CosechaRow
+    - handleUpdate(id, payload): CosechaRow
+    - handleDelete(id): Result
+  }
+
+  class PreciosHandler {
+    + register(): void
+    - handleGetAll(): PrecioCacheRow[]
+    - handleGetLatest(): PrecioCacheRow[]
+    - handleUpsert(payload): PrecioCacheRow
+    - handleDelete(id): Result
+  }
+
+  DatabaseManager <-- CultivosHandler : uses
+  DatabaseManager <-- LotesHandler   : uses
+  DatabaseManager <-- CosechasHandler: uses
+  DatabaseManager <-- PreciosHandler : uses
+}
+
+' ── Preload Bridge ────────────────────────────────────────────────────────────
+
+package "Preload (Context Bridge)" {
+
+  interface AppAPI {
+    + cultivosGetAll(): Promise<Cultivo[]>
+    + cultivosCreate(nombre): Promise<Cultivo>
+    + cultivosDelete(id): Promise<Result>
+    + lotesGetAll(): Promise<LoteRow[]>
+    + lotesCreate(payload): Promise<Lote>
+    + lotesUpdate(id, payload): Promise<Lote>
+    + lotesDelete(id): Promise<Result>
+    + cosechasGetAll(): Promise<CosechaRow[]>
+    + cosechasGetById(id): Promise<CosechaRow>
+    + cosechasCreate(payload): Promise<CosechaRow>
+    + cosechasUpdate(id, payload): Promise<CosechaRow>
+    + cosechasDelete(id): Promise<Result>
+    + preciosGetAll(): Promise<PrecioCacheRow[]>
+    + preciosGetLatest(): Promise<PrecioCacheRow[]>
+    + preciosUpsert(payload): Promise<PrecioCacheRow>
+    + preciosDelete(id): Promise<Result>
+  }
+}
+
+' ── Renderer — Services ───────────────────────────────────────────────────────
+
+package "Proceso Renderer (React / Vite)" {
+
+  package "services" {
+    class CultivosService <<service>> {
+      + getAll(): Promise<Cultivo[]>
+      + create(nombre): Promise<Cultivo>
+      + delete(id): Promise<Result>
+    }
+
+    class LotesService <<service>> {
+      + getAll(): Promise<LoteRow[]>
+      + create(payload): Promise<Lote>
+      + update(id, payload): Promise<Lote>
+      + delete(id): Promise<Result>
+    }
+
+    class CosechasService <<service>> {
+      + getAll(): Promise<CosechaRow[]>
+      + getById(id): Promise<CosechaRow>
+      + create(payload): Promise<CosechaRow>
+      + update(id, payload): Promise<CosechaRow>
+      + delete(id): Promise<Result>
+    }
+
+    class PreciosService <<service>> {
+      + getAll(): Promise<PrecioCacheRow[]>
+      + getLatest(): Promise<PrecioCacheRow[]>
+      + upsert(payload): Promise<PrecioCacheRow>
+      + delete(id): Promise<Result>
+    }
+
+    CultivosService ..> AppAPI : calls window.api
+    LotesService    ..> AppAPI : calls window.api
+    CosechasService ..> AppAPI : calls window.api
+    PreciosService  ..> AppAPI : calls window.api
+  }
+
+  package "pages" {
+    class Dashboard <<component>> {
+      - cosechas: CosechaRow[]
+      - lotes: LoteRow[]
+      - precios: PrecioCacheRow[]
+      + loadAll(): void
+    }
+
+    class Cosechas <<component>> {
+      - cosechas: CosechaRow[]
+      - lotes: Lote[]
+      - cultivos: Cultivo[]
+      + loadAll(): void
+      + handleSave(payload, editId?): void
+      + handleDeleteConfirm(row): void
+    }
+
+    class Lotes <<component>> {
+      - lotes: LoteRow[]
+      + loadAll(): void
+      + handleSave(payload, editId?): void
+      + handleDeleteConfirm(row): void
+    }
+
+    class Precios <<component>> {
+      - precios: PrecioCacheRow[]
+      - cultivos: Cultivo[]
+      + loadAll(): void
+      + handleSave(payload): void
+      + handleDeleteConfirm(row): void
+    }
+
+    class Reportes <<component>> {
+      - cosechas: CosechaRow[]
+      - cultivos: Cultivo[]
+      - lotes: LoteRow[]
+      - precios: PrecioCacheRow[]
+      - filterCultivoId: number | null
+      - filterLoteId: number | null
+      - filterTemporada: string
+      + handleExport(): void
+    }
+  }
+
+  package "components" {
+    class CosechaFormDialog <<component>> {
+      - lotes: Lote[]
+      - cultivos: Cultivo[]
+      + onSave(payload, editId?): void
+    }
+
+    class LoteFormDialog <<component>> {
+      + onSave(payload, editId?): void
+    }
+
+    class PrecioFormDialog <<component>> {
+      - cultivos: Cultivo[]
+      + onSave(payload): void
+    }
+  }
+
+  Dashboard    --> CosechasService : uses
+  Dashboard    --> LotesService    : uses
+  Dashboard    --> PreciosService  : uses
+
+  Cosechas     --> CosechasService : uses
+  Cosechas     --> LotesService    : uses
+  Cosechas     --> CultivosService : uses
+  Cosechas     --> CosechaFormDialog : opens
+
+  Lotes        --> LotesService    : uses
+  Lotes        --> LoteFormDialog  : opens
+
+  Precios      --> PreciosService  : uses
+  Precios      --> CultivosService : uses
+  Precios      --> PrecioFormDialog: opens
+
+  Reportes     --> CosechasService : uses
+  Reportes     --> CultivosService : uses
+  Reportes     --> LotesService    : uses
+  Reportes     --> PreciosService  : uses
+}
+
+' ── Cross-boundary arrow ──────────────────────────────────────────────────────
+AppAPI <.. CultivosHandler : ipcMain.handle (IPC)
+AppAPI <.. LotesHandler    : ipcMain.handle (IPC)
+AppAPI <.. CosechasHandler : ipcMain.handle (IPC)
+AppAPI <.. PreciosHandler  : ipcMain.handle (IPC)
+
+@enduml

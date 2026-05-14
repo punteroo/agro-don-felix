@@ -1,0 +1,62 @@
+@startuml er-database
+title Diagrama ER — Base de Datos SQLite
+
+skinparam shadowing false
+skinparam linetype ortho
+
+entity "cultivos" as cultivos {
+  * id          : INTEGER <<PK, AUTOINCREMENT>>
+  --
+  * nombre      : TEXT <<UNIQUE, NOT NULL>>
+}
+
+entity "lotes" as lotes {
+  * id            : INTEGER <<PK, AUTOINCREMENT>>
+  --
+  * nombre        : TEXT <<NOT NULL>>
+    ubicacion     : TEXT
+  * superficie_ha : REAL <<NOT NULL, > 0>>
+}
+
+entity "cosechas" as cosechas {
+  * id            : INTEGER <<PK, AUTOINCREMENT>>
+  --
+  * lote_id       : INTEGER <<FK>>
+  * cultivo_id    : INTEGER <<FK>>
+  * temporada     : TEXT <<NOT NULL>>
+    fecha_cosecha : TEXT
+  * rendimiento   : REAL <<NOT NULL, >= 0>>
+    humedad_pct   : REAL
+    observaciones : TEXT
+  * created_at    : TEXT <<DEFAULT datetime('now')>>
+}
+
+entity "precios_cache" as precios {
+  * id           : INTEGER <<PK, AUTOINCREMENT>>
+  --
+  * cultivo_id   : INTEGER <<FK>>
+  * precio_ton   : REAL <<NOT NULL>>
+  * moneda       : TEXT <<DEFAULT 'ARS'>>
+  * fuente       : TEXT <<DEFAULT 'MATba-ROFEX'>>
+  * fecha_precio : TEXT <<NOT NULL>>
+  * fetched_at   : TEXT <<DEFAULT datetime('now')>>
+  --
+  UNIQUE (cultivo_id, fecha_precio)
+}
+
+lotes    ||--o{ cosechas : "lote_id\n(ON DELETE CASCADE)"
+cultivos ||--o{ cosechas : "cultivo_id"
+cultivos ||--o{ precios  : "cultivo_id"
+
+note bottom of precios
+  La restricción UNIQUE (cultivo_id, fecha_precio)
+  garantiza una cotización por cultivo por día.
+  El upsert actualiza precio_ton si ya existe.
+end note
+
+note bottom of cosechas
+  La relación con lotes tiene ON DELETE CASCADE:
+  al eliminar un lote se eliminan sus cosechas.
+end note
+
+@enduml

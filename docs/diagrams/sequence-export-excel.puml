@@ -1,0 +1,59 @@
+@startuml sequence-export-excel
+title Secuencia: Exportar Reporte a Excel
+
+skinparam sequenceArrowThickness 1.5
+skinparam shadowing false
+
+actor Usuario as U
+participant "Reportes\n(Page)" as Page
+participant "cosechasService\n(Renderer)" as CosechaSvc
+participant "preciosService\n(Renderer)" as PrecioSvc
+participant "window.api\n(Preload Bridge)" as API
+participant "CosechasHandler /\nPreciosHandler\n(Main Process)" as Handler
+database "SQLite" as DB
+participant "xlsx\n(Librería)" as XLSX
+
+== Carga inicial ==
+activate Page
+Page -> CosechaSvc : getAll()
+Page -> PrecioSvc  : getLatest()
+CosechaSvc -> API : cosechasGetAll()
+PrecioSvc  -> API : preciosGetLatest()
+API -> Handler : IPC invoke
+Handler -> DB : SELECT …
+DB --> Handler : rows
+Handler --> API : data
+API --> Page : cosechas[], precios[]
+deactivate Page
+
+== Aplicación de filtros ==
+U -> Page : selecciona cultivo / lote / temporada
+activate Page
+Page -> Page : filtra en memoria\n(sin nueva consulta)
+Page --> U : actualiza tabla de vista previa
+deactivate Page
+
+== Exportación ==
+U -> Page : click "Exportar a Excel"
+activate Page
+
+Page -> Page : construye detailData[]\n(filas filtradas + valor estimado)
+Page -> Page : construye summaryData[]\n(agrupado por cultivo)
+
+Page -> XLSX : utils.book_new()
+activate XLSX
+Page -> XLSX : utils.json_to_sheet(detailData)
+XLSX --> Page : Worksheet "Cosechas"
+Page -> XLSX : utils.json_to_sheet(summaryData)
+XLSX --> Page : Worksheet "Resumen por cultivo"
+Page -> XLSX : utils.book_append_sheet(wb, ws1)
+Page -> XLSX : utils.book_append_sheet(wb, ws2)
+Page -> XLSX : writeFile(wb, filename)
+XLSX -> XLSX : serializa a buffer\n.xlsx (ZIP + XML)
+XLSX --> Page : archivo escrito en disco
+deactivate XLSX
+
+Page --> U : descarga / guarda archivo\n"cosechas_YYYY-MM-DD.xlsx"
+deactivate Page
+
+@enduml

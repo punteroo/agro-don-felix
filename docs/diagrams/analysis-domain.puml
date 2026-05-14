@@ -1,0 +1,61 @@
+@startuml analysis-domain
+title Diagrama de Clases de Análisis — Modelo de Dominio
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam shadowing false
+
+class Cultivo {
+  + id: number
+  + nombre: string
+}
+
+class Lote {
+  + id: number
+  + nombre: string
+  + ubicacion?: string
+  + superficie_ha: number
+  --
+  ' Atributos derivados (calculados vía JOIN)
+  + cosecha_count: number
+  + produccion_total_tn: number
+}
+
+class Cosecha {
+  + id: number
+  + temporada: string
+  + fecha_cosecha?: string
+  + rendimiento: number
+  + humedad_pct?: number
+  + observaciones?: string
+  + created_at: string
+  --
+  + calcProduccionTn(): number
+}
+
+class PrecioCache {
+  + id: number
+  + precio_ton: number
+  + moneda: string
+  + fuente: string
+  + fecha_precio: string
+  + fetched_at: string
+}
+
+' Relationships
+Lote    "1" o-- "0..*" Cosecha    : contiene
+Cultivo "1" o-- "0..*" Cosecha    : clasifica
+Cultivo "1" o-- "0..*" PrecioCache: tiene precios
+
+note bottom of Cosecha
+  rendimiento en kg/ha.
+  producción = rendimiento × superficie_ha / 1000
+end note
+
+note bottom of PrecioCache
+  Precio por tonelada en ARS.
+  Una entrada por cultivo por fecha (UNIQUE).
+  Fuente puede ser MATba-ROFEX, Bolsa Rosario, manual u otra.
+end note
+
+@enduml

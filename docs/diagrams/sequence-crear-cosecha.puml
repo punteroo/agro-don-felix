@@ -1,0 +1,60 @@
+@startuml sequence-crear-cosecha
+title Secuencia: Crear Cosecha
+
+skinparam sequenceArrowThickness 1.5
+skinparam sequenceGroupBorderThickness 1
+skinparam shadowing false
+
+actor Usuario as U
+participant "Cosechas\n(Page)" as Page
+participant "CosechaFormDialog\n(Component)" as Dialog
+participant "cosechasService\n(Renderer)" as Svc
+participant "window.api\n(Preload Bridge)" as API
+participant "CosechasHandler\n(Main Process)" as Handler
+database "SQLite\n(better-sqlite3)" as DB
+
+U -> Page : click "Nueva cosecha"
+activate Page
+
+Page -> Dialog : open (lotes, cultivos)
+activate Dialog
+
+U -> Dialog : completa campos\n(lote, cultivo, temporada, rendimiento…)
+U -> Dialog : click "Guardar"
+
+Dialog -> Dialog : validate()
+alt validación falla
+  Dialog --> U : muestra errores inline
+else validación pasa
+  Dialog -> Svc : create(payload)
+  activate Svc
+
+  Svc -> API : window.api.cosechasCreate(payload)
+  activate API
+
+  API -> Handler : ipcRenderer.invoke('cosechas:create', payload)
+  activate Handler
+
+  Handler -> DB : INSERT INTO cosechas …\nRETURNING *
+  activate DB
+  DB --> Handler : CosechaRow
+  deactivate DB
+
+  Handler --> API : CosechaRow
+  deactivate Handler
+
+  API --> Svc : Promise<CosechaRow>
+  deactivate API
+
+  Svc --> Dialog : CosechaRow
+  deactivate Svc
+
+  Dialog -> Page : onSave() callback
+  deactivate Dialog
+
+  Page -> Page : loadAll() — recarga datos
+  Page --> U : Toast "Cosecha registrada"
+  deactivate Page
+end
+
+@enduml

@@ -1,0 +1,52 @@
+@startuml sequence-dashboard-load
+title Secuencia: Carga del Panel Principal (Dashboard)
+
+skinparam sequenceArrowThickness 1.5
+skinparam shadowing false
+
+actor Usuario as U
+participant "Dashboard\n(Page)" as Dash
+participant "window.api\n(Preload Bridge)" as API
+participant "Handlers\n(Main Process)" as Handler
+database "SQLite" as DB
+
+U -> Dash : navega a "Panel Principal"
+activate Dash
+
+Dash -> Dash : setLoading(true)
+
+note over Dash, DB
+  Las tres consultas se lanzan en paralelo
+  con Promise.all()
+end note
+
+par Consulta cosechas
+  Dash -> API : cosechasGetAll()
+  API -> Handler : IPC 'cosechas:getAll'
+  Handler -> DB : SELECT c.*, l.nombre, cu.nombre, l.superficie_ha\nFROM cosechas c JOIN lotes l JOIN cultivos cu
+  DB --> Handler : CosechaRow[]
+  Handler --> API : CosechaRow[]
+  API --> Dash : cosechas[]
+and Consulta lotes
+  Dash -> API : lotesGetAll()
+  API -> Handler : IPC 'lotes:getAll'
+  Handler -> DB : SELECT l.*, COUNT(c.id), SUM(c.rendimiento * l.superficie_ha / 1000)\nFROM lotes l LEFT JOIN cosechas c
+  DB --> Handler : LoteRow[]
+  Handler --> API : LoteRow[]
+  API --> Dash : lotes[]
+and Consulta último precio por cultivo
+  Dash -> API : preciosGetLatest()
+  API -> Handler : IPC 'precios:getLatest'
+  Handler -> DB : SELECT p.*, c.nombre FROM precios_cache p\nJOIN cultivos c WHERE fetched_at = MAX(fetched_at)
+  DB --> Handler : PrecioCacheRow[]
+  Handler --> API : PrecioCacheRow[]
+  API --> Dash : precios[]
+end
+
+Dash -> Dash : calcula métricas derivadas\n(producción total, valor estimado,\nproducción por cultivo)
+Dash -> Dash : setLoading(false)
+Dash --> U : renderiza StatCards + BarChart + tabla de precios
+
+deactivate Dash
+
+@enduml
