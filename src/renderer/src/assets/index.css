@@ -1,8 +1,78 @@
-/* PrimeReact theme (Lara Green – clean, professional, agri-appropriate) */
+/* ── PrimeReact base ─────────────────────────────────────────────────────── */
 @import 'primereact/resources/themes/lara-light-green/theme.css';
 @import 'primereact/resources/primereact.min.css';
 @import 'primeicons/primeicons.css';
 @import 'primeflex/primeflex.css';
+
+/* ── Design tokens — light (default) ────────────────────────────────────── */
+:root {
+  /* Brand palette */
+  --brand:           #2e7d32;
+  --brand-hover:     #1b5e20;
+  --brand-light:     #4caf50;
+  --brand-muted:     #e8f5e9;
+
+  /* Page layout */
+  --page-bg:         #f4f7f4;
+
+  /* Sidebar — intentionally dark in both modes */
+  --sidebar-bg:          #1a2e1a;
+  --sidebar-border:      rgba(255, 255, 255, 0.08);
+  --sidebar-text:        rgba(200, 230, 201, 0.7);
+  --sidebar-text-hover:  #e8f5e9;
+  --sidebar-active-text: #ffffff;
+  --sidebar-active-bg:   rgba(255, 255, 255, 0.1);
+  --sidebar-hover-bg:    rgba(255, 255, 255, 0.06);
+  --sidebar-indicator:   #4caf50;
+
+  /* Topbar */
+  --topbar-bg:       #ffffff;
+  --topbar-border:   #dde8dd;
+
+  /* Stat cards */
+  --card-bg:         #ffffff;
+  --card-border:     #dde8dd;
+
+  /* Transitions */
+  --theme-transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── Design tokens — dark ───────────────────────────────────────────────── */
+[data-theme='dark'] {
+  --page-bg:      #141a14;
+  --topbar-bg:    #1e271e;
+  --topbar-border:#2d3d2d;
+  --card-bg:      #1e271e;
+  --card-border:  #2d3d2d;
+
+  /* PrimeReact surface overrides — cascades to all p-* components */
+  --surface-0:       #1e271e;
+  --surface-50:      #232d23;
+  --surface-100:     #2d3d2d;
+  --surface-200:     #354735;
+  --surface-300:     #3d533d;
+  --surface-400:     #4a644a;
+  --surface-500:     #5a7a5a;
+  --surface-600:     #7daa7d;
+  --surface-700:     #a5d6a7;
+  --surface-800:     #c8e6c9;
+  --surface-900:     #e8f5e9;
+
+  --surface-ground:  #141a14;
+  --surface-section: #1e271e;
+  --surface-card:    #1e271e;
+  --surface-overlay: #242f24;
+  --surface-border:  #2d3d2d;
+  --surface-hover:   rgba(255, 255, 255, 0.05);
+
+  --text-color:           #e8f5e9;
+  --text-color-secondary: #8dbf8d;
+
+  --highlight-bg:         rgba(76, 175, 80, 0.16);
+  --highlight-text-color: #a5d6a7;
+  --focus-ring:           0 0 0 0.2rem rgba(76, 175, 80, 0.5);
+  --maskbg:               rgba(0, 0, 0, 0.7);
+}
 
 /* ── Global resets ──────────────────────────────────────────────────────── */
 *,
@@ -17,11 +87,493 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-  background-color: #f0f4f0;
+  font-family: 'Segoe UI', system-ui, Roboto, Arial, sans-serif;
+  font-size: 15px;
+  background-color: var(--page-bg);
+  color: var(--text-color);
+  transition: var(--theme-transition);
 }
 
-/* Slightly larger base font for non-technical users */
-body {
-  font-size: 15px;
+/* ── App shell ──────────────────────────────────────────────────────────── */
+.app-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--page-bg);
+  transition: background-color 0.2s ease;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────────── */
+.app-sidebar {
+  height: 100vh;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.18);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0.875rem;
+  border-bottom: 1px solid var(--sidebar-border);
+  overflow: hidden;
+  flex-shrink: 0;
+  min-height: 58px;
+}
+
+.sidebar-logo-icon {
+  width: 34px;
+  height: 34px;
+  background: rgba(76, 175, 80, 0.18);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-logo-text {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #e8f5e9;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+}
+
+.sidebar-logo-sub {
+  font-size: 0.7rem;
+  color: rgba(200, 230, 201, 0.5);
+  white-space: nowrap;
+  font-weight: 400;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  overflow: hidden;
+  min-height: 40px;
+  transition: background 0.12s ease, color 0.12s ease;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-weight: 500;
+  user-select: none;
+}
+
+.nav-item:hover {
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-text-hover);
+}
+
+.nav-item--active {
+  color: var(--sidebar-active-text) !important;
+  background: var(--sidebar-active-bg) !important;
+  font-weight: 600;
+}
+
+.nav-active-indicator {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--sidebar-indicator);
+  border-radius: 0 2px 2px 0;
+}
+
+.sidebar-footer {
+  padding: 0.625rem 0.5rem;
+  border-top: 1px solid var(--sidebar-border);
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: var(--sidebar-text);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.sidebar-collapse-btn:hover {
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-text-hover);
+}
+
+/* ── Main content area ──────────────────────────────────────────────────── */
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--page-bg);
+  transition: background-color 0.2s ease;
+}
+
+.app-topbar {
+  height: 52px;
+  background: var(--topbar-bg);
+  border-bottom: 1px solid var(--topbar-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  transition: var(--theme-transition);
+}
+
+.app-topbar-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease;
+}
+
+.app-content {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+/* ── Theme toggle button ────────────────────────────────────────────────── */
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--topbar-border);
+  background: transparent;
+  color: var(--text-color-secondary);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: var(--theme-transition), box-shadow 0.12s ease;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-color);
+  border-color: var(--brand-light);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.15);
+}
+
+/* ── Stat cards ─────────────────────────────────────────────────────────── */
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-left-width: 4px;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  flex: 1;
+  min-width: 160px;
+  cursor: default;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: var(--theme-transition), box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.stat-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.stat-card-label {
+  font-size: 0.775rem;
+  color: var(--text-color-secondary);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.stat-card-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-color);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* ── PrimeReact card override — adapt to our surface tokens ─────────────── */
+.card.surface-0 {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  transition: var(--theme-transition);
+}
+
+/* ── Smooth PrimeReact DataTable dark mode ──────────────────────────────── */
+[data-theme='dark'] .p-datatable .p-datatable-thead > tr > th {
+  background: var(--surface-100);
+  color: var(--text-color);
+  border-color: var(--surface-border);
+}
+
+[data-theme='dark'] .p-datatable .p-datatable-tbody > tr {
+  background: var(--surface-0);
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  background: var(--surface-50);
+}
+
+[data-theme='dark'] .p-datatable .p-datatable-tbody > tr:hover {
+  background: var(--surface-100) !important;
+}
+
+[data-theme='dark'] .p-datatable .p-datatable-tfoot > tr > td {
+  background: var(--surface-100);
+  color: var(--text-color);
+  border-color: var(--surface-border);
+}
+
+[data-theme='dark'] .p-paginator {
+  background: var(--surface-0);
+  border-color: var(--surface-border);
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-paginator .p-paginator-element {
+  color: var(--text-color-secondary);
+}
+
+[data-theme='dark'] .p-paginator .p-paginator-element:hover {
+  background: var(--surface-hover);
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-paginator .p-highlight {
+  background: var(--highlight-bg);
+  color: var(--text-color);
+}
+
+/* ── Toolbar ────────────────────────────────────────────────────────────── */
+[data-theme='dark'] .p-toolbar {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* ── Input fields ───────────────────────────────────────────────────────── */
+[data-theme='dark'] .p-inputtext,
+[data-theme='dark'] .p-inputnumber-input,
+[data-theme='dark'] .p-textarea {
+  background: var(--surface-100);
+  border-color: var(--surface-border);
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-inputtext:focus,
+[data-theme='dark'] .p-inputnumber-input:focus {
+  border-color: var(--brand-light);
+  box-shadow: var(--focus-ring);
+}
+
+/* ── Dropdown ───────────────────────────────────────────────────────────── */
+[data-theme='dark'] .p-dropdown,
+[data-theme='dark'] .p-multiselect {
+  background: var(--surface-100);
+  border-color: var(--surface-border);
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-dropdown:not(.p-disabled):hover,
+[data-theme='dark'] .p-multiselect:not(.p-disabled):hover {
+  border-color: var(--brand-light);
+}
+
+[data-theme='dark'] .p-dropdown-panel,
+[data-theme='dark'] .p-multiselect-panel {
+  background: var(--surface-overlay);
+  border-color: var(--surface-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .p-dropdown-item,
+[data-theme='dark'] .p-multiselect-item {
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-dropdown-item:hover,
+[data-theme='dark'] .p-multiselect-item:hover {
+  background: var(--surface-hover);
+}
+
+[data-theme='dark'] .p-dropdown-item.p-highlight,
+[data-theme='dark'] .p-multiselect-item.p-highlight {
+  background: var(--highlight-bg);
+  color: var(--text-color);
+}
+
+/* ── Calendar ───────────────────────────────────────────────────────────── */
+[data-theme='dark'] .p-datepicker {
+  background: var(--surface-overlay);
+  border-color: var(--surface-border);
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-datepicker .p-datepicker-header {
+  background: var(--surface-100);
+  border-color: var(--surface-border);
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-datepicker table td > span {
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-datepicker table td > span:hover {
+  background: var(--surface-hover);
+}
+
+[data-theme='dark'] .p-datepicker table td > span.p-highlight {
+  background: var(--highlight-bg);
+  color: var(--brand-light);
+}
+
+/* ── Dialog ─────────────────────────────────────────────────────────────── */
+[data-theme='dark'] .p-dialog {
+  background: var(--surface-overlay);
+  border-color: var(--surface-border);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme='dark'] .p-dialog .p-dialog-header {
+  background: var(--surface-overlay);
+  border-color: var(--surface-border);
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-dialog .p-dialog-content {
+  background: var(--surface-overlay);
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-dialog .p-dialog-footer {
+  background: var(--surface-overlay);
+  border-color: var(--surface-border);
+}
+
+/* ── Confirm dialog overlay ─────────────────────────────────────────────── */
+[data-theme='dark'] .p-confirm-dialog .p-dialog-content {
+  background: var(--surface-overlay);
+}
+
+/* ── Toast ──────────────────────────────────────────────────────────────── */
+[data-theme='dark'] .p-toast .p-toast-message {
+  background: var(--surface-overlay);
+  border-color: var(--surface-border);
+  color: var(--text-color);
+}
+
+/* ── Message component ──────────────────────────────────────────────────── */
+[data-theme='dark'] .p-message {
+  background: var(--surface-100);
+  border-color: var(--surface-border);
+  color: var(--text-color);
+}
+
+/* ── InputGroup addon ───────────────────────────────────────────────────── */
+[data-theme='dark'] .p-inputgroup-addon {
+  background: var(--surface-100);
+  border-color: var(--surface-border);
+  color: var(--text-color-secondary);
+}
+
+/* ── PrimeReact component internals ─────────────────────────────────────── */
+[data-theme='dark'] .p-dropdown .p-dropdown-label,
+[data-theme='dark'] .p-multiselect .p-multiselect-label {
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-column-title {
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-dialog-title {
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-datepicker-title,
+[data-theme='dark'] .p-datepicker-title .p-link {
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-datepicker table th > span {
+  color: var(--text-color-secondary);
+}
+
+[data-theme='dark'] .p-paginator .p-paginator-current {
+  color: var(--text-color-secondary);
+}
+
+[data-theme='dark'] .p-confirm-dialog-message {
+  color: var(--text-color);
+}
+
+[data-theme='dark'] .p-tag.p-tag-secondary {
+  background: var(--surface-200);
+  color: var(--text-color);
+}
+
+/* ── PrimeFlex text-N overrides (hardcoded in light theme) ──────────────── */
+[data-theme='dark'] .text-900,
+[data-theme='dark'] .text-800,
+[data-theme='dark'] .text-700 {
+  color: var(--text-color) !important;
+}
+
+[data-theme='dark'] .text-600,
+[data-theme='dark'] .text-500 {
+  color: var(--text-color-secondary) !important;
+}
+
+[data-theme='dark'] .text-400,
+[data-theme='dark'] .text-300 {
+  color: rgba(141, 191, 141, 0.45) !important;
 }
