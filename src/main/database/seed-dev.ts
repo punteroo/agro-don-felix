@@ -7,8 +7,11 @@ import type Database from 'better-sqlite3'
  * Data profile:
  *   - 5 lotes in Departamento Unión, Córdoba (Bell Ville, Justiniano Posse, Canals, Noetinger, Morrison)
  *   - Crops: Soja, Maíz (summer campaign 2024/2025), Trigo (winter campaign 2024)
- *   - Emergent data: 2025 winter Trigo implantation in progress
+ *   - Emergent data: 2025 winter Trigo implantation in progress (produccion_tn = 0)
  *   - Monthly MATba-ROFEX price snapshots: January–May 2025
+ *
+ * Input model: total production in tons is the primary value; rendimiento (kg/ha) is always
+ * derived as produccion_tn * 1000 / superficie_ha, matching exactly how the UI works.
  */
 export function seedDevData(db: Database.Database): void {
   const { n } = db.prepare('SELECT COUNT(*) AS n FROM lotes').get() as { n: number }
@@ -37,6 +40,11 @@ export function seedDevData(db: Database.Database): void {
   const maiz  = cultivoId('Maíz')
   const trigo = cultivoId('Trigo')
 
+  /** Derives rendimiento (kg/ha) from total production and lote surface area. */
+  function rend(produccionTn: number, superficieHa: number): number {
+    return (produccionTn * 1000) / superficieHa
+  }
+
   db.transaction(() => {
     // ── Lotes ──────────────────────────────────────────────────────────────
     const l1 = Number(insertLote.run('LOTE "SAN PABLO"',    'Bell Ville, Unión',       120.0).lastInsertRowid)
@@ -47,24 +55,25 @@ export function seedDevData(db: Database.Database): void {
 
     // ── Cosechas 2024/2025 — verano (Soja + Maíz) ─────────────────────────
     // Soja: lotes 1, 2, 3, 5 — cosecha marzo/abril 2025
-    insertCosecha.run(l1, soja, '2024/2025', '2025-03-28', 3250,  13.5, null)
-    insertCosecha.run(l2, soja, '2024/2025', '2025-04-05', 3100,  14.0, null)
-    insertCosecha.run(l3, soja, '2024/2025', '2025-03-18', 3480,  12.8, null)
-    insertCosecha.run(l5, soja, '2024/2025', '2025-04-02', 3320,  13.5, null)
+    insertCosecha.run(l1, soja, '2024/2025', '2025-03-28', rend(390,    120), 13.5, null)
+    insertCosecha.run(l2, soja, '2024/2025', '2025-04-05', rend(263.5,   85), 14.0, null)
+    insertCosecha.run(l3, soja, '2024/2025', '2025-03-18', rend(696,    200), 12.8, null)
+    insertCosecha.run(l5, soja, '2024/2025', '2025-04-02', rend(498,    150), 13.5, null)
 
     // Maíz: lotes 1, 3, 4 — cosecha febrero/marzo 2025
-    insertCosecha.run(l1, maiz, '2024/2025', '2025-02-20', 11200, 15.2, null)
-    insertCosecha.run(l3, maiz, '2024/2025', '2025-02-14', 12100, 14.5, null)
-    insertCosecha.run(l4, maiz, '2024/2025', '2025-03-05', 10800, 16.0, null)
+    insertCosecha.run(l1, maiz, '2024/2025', '2025-02-20', rend(1344,   120), 15.2, null)
+    insertCosecha.run(l3, maiz, '2024/2025', '2025-02-14', rend(2420,   200), 14.5, null)
+    insertCosecha.run(l4, maiz, '2024/2025', '2025-03-05', rend(702,     65), 16.0, null)
 
     // ── Cosechas 2024 — invierno (Trigo) ───────────────────────────────────
     // Trigo: lotes 2, 4, 5 — cosecha noviembre 2024
-    insertCosecha.run(l2, trigo, '2024', '2024-11-12', 3800, 11.5, null)
-    insertCosecha.run(l4, trigo, '2024', '2024-11-08', 3600, 12.0, null)
-    insertCosecha.run(l5, trigo, '2024', '2024-11-20', 4050, 11.0, null)
+    insertCosecha.run(l2, trigo, '2024', '2024-11-12', rend(323,    85), 11.5, null)
+    insertCosecha.run(l4, trigo, '2024', '2024-11-08', rend(234,    65), 12.0, null)
+    insertCosecha.run(l5, trigo, '2024', '2024-11-20', rend(607.5, 150), 11.0, null)
 
     // ── Cosechas 2025 — campaña fina en curso (implantación) ───────────────
-    // Trigo sembrado en mayo/junio 2025, estimado cosecha noviembre 2025
+    // Trigo sembrado mayo/junio 2025, cosecha estimada noviembre 2025.
+    // produccion_tn = 0 signals an in-progress implantation (no harvest yet).
     const obsEnCurso = 'Implantación en curso — cosecha estimada noviembre 2025'
     insertCosecha.run(l2, trigo, '2025', null, 0, null, obsEnCurso)
     insertCosecha.run(l4, trigo, '2025', null, 0, null, obsEnCurso)

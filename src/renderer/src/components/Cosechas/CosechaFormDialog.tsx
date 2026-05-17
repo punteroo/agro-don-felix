@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Dialog } from 'primereact/dialog'
 import { Button } from 'primereact/button'
-import { InputText } from 'primereact/inputtext'
 import { InputNumber, type InputNumberValueChangeEvent } from 'primereact/inputnumber'
 import { Dropdown } from 'primereact/dropdown'
 import { Calendar } from 'primereact/calendar'
@@ -12,12 +11,14 @@ import type { CosechaPayload, CosechaRow, Lote, Cultivo } from '../../types/doma
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-/** Returns the current Argentine agro season (e.g. "2025/2026"). */
-function getDefaultTemporada(): string {
+/** Returns the two year parts of the current Argentine agro season. */
+function getDefaultTemporadaParts(): { yearA: number; yearB: number | null } {
   const now = new Date()
   const year = now.getFullYear()
-  const month = now.getMonth() + 1 // 1-based
-  return month < 7 ? `${year - 1}/${year}` : `${year}/${year + 1}`
+  const month = now.getMonth() + 1
+  return month < 7
+    ? { yearA: year - 1, yearB: year }
+    : { yearA: year, yearB: year + 1 }
 }
 
 function dateToIso(d: Date | null): string | undefined {
@@ -37,9 +38,11 @@ function isoToDate(s: string | undefined): Date | null {
 interface FormState {
   lote_id: number | null
   cultivo_id: number | null
-  temporada: string
+  temporadaA: number | null
+  temporadaB: number | null
   fechaCosecha: Date | null
-  rendimiento: number | null
+  /** Total production in tons entered by the user. rendimiento (kg/ha) is derived from this. */
+  produccion_tn: number | null
   humedad_pct: number | null
   observaciones: string
 }
@@ -48,7 +51,7 @@ interface FormErrors {
   lote_id?: string
   cultivo_id?: string
   temporada?: string
-  rendimiento?: string
+  produccion_tn?: string
 }
 
 interface Props {
@@ -62,17 +65,21 @@ interface Props {
   cultivos: Cultivo[]
 }
 
-// ── Initial state factory ──────────────────────────────────────────────────────
+// ── Initial state factory ─────────────────────────────────────────────────────
 
-const emptyForm = (): FormState => ({
-  lote_id: null,
-  cultivo_id: null,
-  temporada: getDefaultTemporada(),
-  fechaCosecha: null,
-  rendimiento: null,
-  humedad_pct: null,
-  observaciones: ''
-})
+const emptyForm = (): FormState => {
+  const { yearA, yearB } = getDefaultTemporadaParts()
+  return {
+    lote_id: null,
+    cultivo_id: null,
+    temporadaA: yearA,
+    temporadaB: yearB,
+    fechaCosecha: null,
+    produccion_tn: null,
+    humedad_pct: null,
+    observaciones: ''
+  }
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -87,12 +94,19 @@ export default function CosechaFormDialog({ visible, onHide, onSave, cosecha, lo
   useEffect(() => {
     if (!visible) return
     if (isEdit && cosecha) {
+      const parts = cosecha.temporada.split('/')
+      const parsedA = parseInt(parts[0], 10)
+      const parsedB = parts[1] ? parseInt(parts[1], 10) : null
       setForm({
         lote_id: cosecha.lote_id,
         cultivo_id: cosecha.cultivo_id,
-        temporada: cosecha.temporada,
+        temporadaA: isNaN(parsedA) ? null : parsedA,
+        temporadaB: parsedB !== null && !isNaN(parsedB) ? parsedB : null,
         fechaCosecha: isoToDate(cosecha.fecha_cosecha),
-        rendimiento: cosecha.rendimiento,
+        // Back-calculate total tons from stored rendimiento x superficie_ha
+        produccion_tn: cosecha.rendimiento > 0
+          ? parseFloat(((cosecha.rendimiento * cosecha.superficie_ha) / 1000).toFixed(2))
+          : 0,
         humedad_pct: cosecha.humedad_pct ?? null,
         observaciones: cosecha.observaciones ?? ''
       })
@@ -108,20 +122,22 @@ export default function CosechaFormDialog({ visible, onHide, onSave, cosecha, lo
     const e: FormErrors = {}
     if (!form.lote_id) e.lote_id = 'Seleccione un lote.'
     if (!form.cultivo_id) e.cultivo_id = 'Seleccione un cultivo.'
-    if (!form.temporada.trim()) e.temporada = 'Ingrese la temporada.'
-    if (form.rendimiento === null || form.rendimiento < 0)
-      e.rendimiento = 'Ingrese el rendimiento (≥ 0).'
+    if (!form.temporadaA) e.temporada = 'Ingrese el año de inicio.'
+    else if (form.temporadaB !== null && form.temporadaB <= form.temporadaA)
+      e.temporada = 'El año de fin debe ser mayor al año de inicio.'
+    if (form.produccion_tn === null || form.produccion_tn < 0)
+      e.produccion_tn = 'Ingrese la producción total (>= 0 tn).'
     return e
   }, [form])
 
-  // ── Derived: estimated production ──────────────────────────────────────────
+  // ── Derived: rendimiento preview ──────────────────────────────────────────
 
   const selectedLote = lotes.find((l) => l.id === form.lote_id) ?? null
-  const produccionTn =
-    selectedLote && form.rendimiento !== null
-      ? ((form.rendimiento * selectedLote.superficie_ha) / 1000).toLocaleString('es-AR', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
+  // Shown once the user enters tn and a lote with known surface is selected
+  const rendimientoCalc =
+    selectedLote && form.produccion_tn !== null && form.produccion_tn > 0 && selectedLote.superficie_ha > 0
+      ? ((form.produccion_tn * 1000) / selectedLote.superficie_ha).toLocaleString('es-AR', {
+          maximumFractionDigits: 0
         })
       : null
 
@@ -141,12 +157,21 @@ export default function CosechaFormDialog({ visible, onHide, onSave, cosecha, lo
     }
 
     // At this point required fields are guaranteed non-null by validation
+    const temporada = form.temporadaB !== null
+      ? `${form.temporadaA}/${form.temporadaB}`
+      : `${form.temporadaA}`
+
+    // Derive rendimiento (kg/ha) from user-supplied total tons / lote surface
+    const rendimiento = selectedLote && selectedLote.superficie_ha > 0
+      ? (form.produccion_tn! * 1000) / selectedLote.superficie_ha
+      : 0
+
     const payload: CosechaPayload = {
       lote_id: form.lote_id!,
       cultivo_id: form.cultivo_id!,
-      temporada: form.temporada.trim(),
+      temporada,
       fecha_cosecha: dateToIso(form.fechaCosecha),
-      rendimiento: form.rendimiento!,
+      rendimiento,
       humedad_pct: form.humedad_pct ?? undefined,
       observaciones: form.observaciones.trim() || undefined
     }
@@ -257,18 +282,38 @@ export default function CosechaFormDialog({ visible, onHide, onSave, cosecha, lo
           <label className="font-semibold mb-1 block">
             Temporada <span className="text-red-500">*</span>
           </label>
-          <InputText
-            value={form.temporada}
-            onChange={(e) => set('temporada', e.target.value)}
-            placeholder="ej. 2025/2026"
-            className={errors.temporada ? 'p-invalid' : ''}
-          />
+          <div className="flex align-items-center gap-2">
+            <InputNumber
+              value={form.temporadaA}
+              onValueChange={(e) => set('temporadaA', e.value ?? null)}
+              placeholder="Inicio"
+              min={1900}
+              max={2099}
+              useGrouping={false}
+              className={errors.temporada && !form.temporadaB ? 'p-invalid' : ''}
+              style={{ flex: 1, minWidth: 0 }}
+            />
+            <span style={{ color: 'var(--text-color-secondary)', fontWeight: 600, flexShrink: 0 }}>/</span>
+            <InputNumber
+              value={form.temporadaB}
+              onValueChange={(e) => set('temporadaB', e.value ?? null)}
+              placeholder="Fin"
+              min={1900}
+              max={2099}
+              useGrouping={false}
+              className={errors.temporada && form.temporadaA ? 'p-invalid' : ''}
+              style={{ flex: 1, minWidth: 0 }}
+            />
+          </div>
+          <small style={{ color: 'var(--text-color-secondary)', fontSize: '0.72rem' }}>
+            Un año (ej. 2025) o rango (ej. 2024 / 2025). Fin es opcional.
+          </small>
           {errors.temporada && (
             <small className="p-error block mt-1">{errors.temporada}</small>
           )}
         </div>
 
-        {/* ── Row 2: Fecha / Rendimiento / Humedad ── */}
+        {/* ── Row 2: Fecha / Producción total / Humedad ── */}
         <div className="field col-12 md:col-4">
           <label className="font-semibold mb-1 block">Fecha de cosecha</label>
           <Calendar
@@ -284,20 +329,20 @@ export default function CosechaFormDialog({ visible, onHide, onSave, cosecha, lo
 
         <div className="field col-12 md:col-4">
           <label className="font-semibold mb-1 block">
-            Rendimiento <span className="text-red-500">*</span>
+            Producción total <span className="text-red-500">*</span>
           </label>
           <InputNumber
-            value={form.rendimiento}
-            onValueChange={(e: InputNumberValueChangeEvent) => set('rendimiento', e.value ?? null)}
-            suffix=" kg/ha"
+            value={form.produccion_tn}
+            onValueChange={(e: InputNumberValueChangeEvent) => set('produccion_tn', e.value ?? null)}
+            suffix=" tn"
             min={0}
-            maxFractionDigits={2}
-            placeholder="0 kg/ha"
-            className={errors.rendimiento ? 'p-invalid' : ''}
+            maxFractionDigits={3}
+            placeholder="0 tn"
+            className={errors.produccion_tn ? 'p-invalid' : ''}
             locale="es-AR"
           />
-          {errors.rendimiento && (
-            <small className="p-error block mt-1">{errors.rendimiento}</small>
+          {errors.produccion_tn && (
+            <small className="p-error block mt-1">{errors.produccion_tn}</small>
           )}
         </div>
 
@@ -327,15 +372,15 @@ export default function CosechaFormDialog({ visible, onHide, onSave, cosecha, lo
           />
         </div>
 
-        {/* ── Production estimate ── */}
-        {produccionTn && (
+        {/* ── Yield estimate ── */}
+        {rendimientoCalc && (
           <>
             <Divider className="col-12 my-0" />
             <div className="col-12">
               <Message
                 severity="info"
                 icon="pi pi-calculator"
-                text={`Producción estimada: ${produccionTn} tn  (${form.rendimiento?.toLocaleString('es-AR')} kg/ha × ${selectedLote!.superficie_ha} ha)`}
+                text={`Rendimiento calculado: ${rendimientoCalc} kg/ha  (${form.produccion_tn?.toLocaleString('es-AR')} tn / ${selectedLote!.superficie_ha} ha)`}
                 className="w-full"
               />
             </div>
