@@ -8,6 +8,7 @@ import {
   Map,
   TrendingUp,
   FileSpreadsheet,
+  Settings,
   PanelLeftClose,
   PanelLeftOpen,
   Sun,
@@ -21,19 +22,21 @@ const SIDEBAR_EXPANDED = 220
 const SIDEBAR_COLLAPSED = 60
 
 const NAV_ITEMS = [
-  { path: '/',          icon: LayoutDashboard, label: 'Panel',    end: true },
-  { path: '/cosechas',  icon: Wheat,           label: 'Cosechas', end: false },
-  { path: '/lotes',     icon: Map,             label: 'Lotes',    end: false },
-  { path: '/precios',   icon: TrendingUp,      label: 'Precios',  end: false },
-  { path: '/reportes',  icon: FileSpreadsheet, label: 'Reportes', end: false }
+  { path: '/',               icon: LayoutDashboard, label: 'Panel',          end: true  },
+  { path: '/cosechas',       icon: Wheat,           label: 'Cosechas',       end: false },
+  { path: '/lotes',          icon: Map,             label: 'Lotes',          end: false },
+  { path: '/precios',        icon: TrendingUp,      label: 'Precios',        end: false },
+  { path: '/reportes',       icon: FileSpreadsheet, label: 'Reportes',       end: false },
+  { path: '/configuracion',  icon: Settings,        label: 'Configuración',  end: false }
 ]
 
 const PAGE_TITLES: Record<string, string> = {
-  '/':          'Panel Principal',
-  '/cosechas':  'Gestión de Cosechas',
-  '/lotes':     'Gestión de Lotes',
-  '/precios':   'Precios de Mercado',
-  '/reportes':  'Reportes y Exportación'
+  '/':               'Panel Principal',
+  '/cosechas':       'Gestión de Cosechas',
+  '/lotes':          'Gestión de Lotes',
+  '/precios':        'Precios de Mercado',
+  '/reportes':       'Reportes y Exportación',
+  '/configuracion':  'Configuración'
 }
 
 // ── Sidebar animations ────────────────────────────────────────────────────────

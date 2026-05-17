@@ -88,11 +88,20 @@ body,
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', system-ui, Roboto, Arial, sans-serif;
-  font-size: 15px;
   background-color: var(--page-bg);
   color: var(--text-color);
   transition: var(--theme-transition);
 }
+
+html {
+  font-size: 15px;
+}
+
+/* ── Font size scale — data attribute set by SettingsContext ─────────────── */
+html[data-font-size='small']  { font-size: 13px; }
+html[data-font-size='normal'] { font-size: 15px; }
+html[data-font-size='large']  { font-size: 18px; }
+html[data-font-size='xlarge'] { font-size: 21px; }
 
 /* ── App shell ──────────────────────────────────────────────────────────── */
 .app-shell {
@@ -576,4 +585,197 @@ body,
 [data-theme='dark'] .text-400,
 [data-theme='dark'] .text-300 {
   color: rgba(141, 191, 141, 0.45) !important;
+}
+
+/* ── Configuration page ─────────────────────────────────────────────────── */
+.config-section-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: var(--theme-transition);
+}
+
+.config-section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.config-section-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--brand-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+[data-theme='dark'] .config-section-icon {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--brand-light);
+}
+
+.config-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0 0 0.25rem;
+  line-height: 1.3;
+}
+
+.config-section-desc {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Font size buttons ──────────────────────────────────────────────────── */
+.config-font-options {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.config-font-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  padding: 0.875rem 1rem 0.75rem;
+  border: 1.5px solid var(--card-border);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+  min-width: 100px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.config-font-btn:hover {
+  border-color: var(--brand-light);
+  background: var(--brand-muted);
+  color: var(--brand);
+}
+
+[data-theme='dark'] .config-font-btn:hover {
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--brand-light);
+}
+
+.config-font-btn--active {
+  border-color: var(--brand);
+  background: var(--brand-muted);
+  color: var(--brand);
+}
+
+[data-theme='dark'] .config-font-btn--active {
+  background: rgba(76, 175, 80, 0.12);
+  color: var(--brand-light);
+}
+
+.config-font-sample {
+  font-weight: 700;
+  line-height: 1;
+  display: block;
+}
+
+.config-font-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+/* ── Preview box ────────────────────────────────────────────────────────── */
+.config-preview-box {
+  border: 1px solid var(--card-border);
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--page-bg);
+  color: var(--text-color);
+  transition: var(--theme-transition);
+}
+
+.config-preview-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-color-secondary);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Color mode tiles ───────────────────────────────────────────────────── */
+.config-color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 0.75rem;
+}
+
+.config-color-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.875rem 1rem;
+  border: 1.5px solid var(--card-border);
+  border-radius: 0.5rem;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.config-color-tile:hover {
+  border-color: var(--brand-light);
+  background: var(--brand-muted);
+}
+
+[data-theme='dark'] .config-color-tile:hover {
+  background: rgba(76, 175, 80, 0.08);
+}
+
+.config-color-tile--active {
+  border-color: var(--brand);
+  background: var(--brand-muted);
+}
+
+[data-theme='dark'] .config-color-tile--active {
+  background: rgba(76, 175, 80, 0.12);
+}
+
+.config-color-tile-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.config-color-tile-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.config-color-tile-desc {
+  font-size: 0.77rem;
+  color: var(--text-color-secondary);
+  line-height: 1.4;
+}
+
+/* ── Check icon (shared across font + color options) ────────────────────── */
+.config-check-icon {
+  color: var(--brand);
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .config-check-icon {
+  color: var(--brand-light);
 }

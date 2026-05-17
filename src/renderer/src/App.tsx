@@ -5,6 +5,7 @@ import Cosechas from './pages/Cosechas'
 import Lotes from './pages/Lotes'
 import Precios from './pages/Precios'
 import Reportes from './pages/Reportes'
+import Configuracion from './pages/Configuracion'
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/lotes" element={<Lotes />} />
         <Route path="/precios" element={<Precios />} />
         <Route path="/reportes" element={<Reportes />} />
+        <Route path="/configuracion" element={<Configuracion />} />
       </Routes>
     </AppLayout>
   )
