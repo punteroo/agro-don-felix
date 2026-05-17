@@ -47,7 +47,7 @@ Toda comunicación entre el renderer y la base de datos pasa por el mecanismo `i
 **React con TypeScript y PrimeReact**
 El renderer utiliza React 19 con TypeScript para la construcción de la interfaz. La biblioteca de componentes PrimeReact provee tablas, formularios y diálogos listos para usar, lo que acelera el desarrollo y garantiza consistencia visual. Vite, integrado mediante `electron-vite`, ofrece hot module replacement durante el desarrollo y builds optimizados para distribución.
 
-**recharts para visualizaciones**
+**`recharts` para visualizaciones**
 Los gráficos del panel principal se implementan con recharts, biblioteca de gráficos basada en componentes React que permite componer visualizaciones de manera declarativa. Se optó por esta biblioteca por su integración natural con el ecosistema React y su ligereza relativa frente a alternativas como D3.
 
 **xlsx para exportación a Excel**
@@ -69,7 +69,9 @@ El diagrama muestra la arquitectura en tres capas: el proceso principal con sus 
 
 _[Diagrama: sequence-crear-cosecha]_
 
-Este diagrama ilustra el flujo completo desde que el usuario abre el formulario de nueva cosecha hasta que el registro es persistido y la tabla se actualiza. El punto de mayor interés es la transición del renderer al proceso principal a través del canal IPC: desde la perspectiva del renderer, la operación es una llamada a promesa; en el proceso principal, es una consulta sincrónica a SQLite. El diagrama también muestra el manejo de la validación: si los campos obligatorios no están completos, el formulario permanece abierto y muestra mensajes de error sin invocar el IPC.
+Este diagrama ilustra el flujo completo desde que el usuario abre el formulario de nueva cosecha hasta que el registro es persistido y la tabla se actualiza. El dato clave que el usuario ingresa es la **producción total en toneladas**; el formulario deriva automáticamente el rendimiento en kg/ha mediante la fórmula `rendimiento = produccion_tn × 1000 / superficie_ha` antes de construir el payload. El valor almacenado en la base de datos es siempre el rendimiento (kg/ha), no las toneladas ingresadas. El diagrama también muestra el manejo de la validación: si los campos obligatorios no están completos, el formulario permanece abierto y muestra mensajes de error sin invocar el IPC.
+
+Un aspecto relevante del modelo de ingreso es que el usuario no registra el rendimiento directamente. En cambio, ingresa la **producción total en toneladas** cosechadas en el lote. El componente `CosechaFormDialog` deriva el rendimiento (kg/ha) antes de armar el payload: `rendimiento = produccionTn × 1000 / superficie_ha`. La base de datos almacena el rendimiento calculado; la producción total se reconstruye al leer multiplicando rendimiento por superficie. El formulario muestra en tiempo real el rendimiento calculado a medida que el usuario ingresa las toneladas, lo que le permite verificar la coherencia del dato antes de guardar.
 
 #### Diagrama de secuencia: carga analítica de Reportes
 
@@ -105,7 +107,13 @@ El panel principal realiza tres consultas en paralelo mediante `Promise.all()`: 
 
 ### Análisis
 
-Esta sección presenta los artefactos que describen el aspecto de análisis del sistema: el modelo de dominio, el esquema físico de la base de datos y el comportamiento dinámico de los formularios más complejos.
+Esta sección presenta los artefactos que describen el aspecto de análisis del sistema: el modelo de dominio, el esquema físico de la base de datos, los casos de uso y el comportamiento dinámico de los formularios más complejos.
+
+#### Diagrama de casos de uso
+
+_[Diagrama: use-cases]_
+
+El diagrama de casos de uso identifica al único actor del sistema —el Usuario operativo— y agrupa las funcionalidades en seis módulos: Gestión de Cultivos, Gestión de Lotes, Gestión de Cosechas, Gestión de Precios, Panel Principal y Reportes y Analítica. Las relaciones `<<include>>` y `<<extend>>` destacan dos invariantes clave del sistema: que el cálculo automático de rendimiento es parte inseparable del registro de toda cosecha completada, y que las proyecciones de campaña en curso son una extensión condicional del reporte analítico, activa únicamente cuando el conjunto de datos filtrado contiene implantaciones sin producción.
 
 #### Diagrama de clases de dominio
 
