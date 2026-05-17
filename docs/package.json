@@ -1,0 +1,13 @@
+{
+  "name": "@agrodonfelix/docs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "node-plantuml-2": "^1.1.8"
+  },
+  "scripts": {
+    "generate:diagrams": "node render.js"
+  }
+}

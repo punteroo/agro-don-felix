@@ -1,5 +1,5 @@
 @startuml design-classes
-title Diagrama de Clases de Diseño — Agro Don Félix
+title Diagrama de Clases de Diseño - Agro Don Félix
 
 skinparam classAttributeIconSize 0
 skinparam classFontSize 12
@@ -7,9 +7,11 @@ skinparam packageStyle rectangle
 skinparam shadowing false
 skinparam linetype ortho
 
+!theme mimeograph
+
 ' ── Main Process ─────────────────────────────────────────────────────────────
 
-package "Proceso Principal (Node.js / Electron Main)" {
+package "Proceso Principal" {
 
   class DatabaseManager <<singleton>> {
     - db: Database

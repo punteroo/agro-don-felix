@@ -5,6 +5,8 @@ skinparam classAttributeIconSize 0
 skinparam classFontSize 12
 skinparam shadowing false
 
+!theme mimeograph
+
 class Cultivo {
   + id: number
   + nombre: string
@@ -48,8 +50,11 @@ Cultivo "1" o-- "0..*" Cosecha    : clasifica
 Cultivo "1" o-- "0..*" PrecioCache: tiene precios
 
 note bottom of Cosecha
-  rendimiento en kg/ha.
-  producción = rendimiento × superficie_ha / 1000
+  El usuario registra la producción total en toneladas (tn).
+  rendimiento (kg/ha) es calculado automáticamente por el formulario:
+    rendimiento = produccion_tn x 1000 / superficie_ha
+  El valor almacenado en la base de datos es rendimiento (kg/ha).
+  calcProduccionTn() = rendimiento x superficie_ha / 1000
 end note
 
 note bottom of PrecioCache

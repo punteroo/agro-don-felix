@@ -4,6 +4,8 @@ title Diagrama de Estado — PrecioFormDialog
 skinparam shadowing false
 skinparam stateFontSize 12
 
+!theme mimeograph
+
 [*] --> Cerrado
 
 Cerrado --> Abierto : usuario presiona "Registrar precio"

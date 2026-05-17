@@ -1,0 +1,111 @@
+@startuml use-cases
+title Diagrama de Casos de Uso — Agro Don Félix
+
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecaseFontSize 12
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam ArrowColor #555555
+
+!theme mimeograph
+
+left to right direction
+
+actor "Usuario\noperativo" as U
+
+rectangle "Gestión de Cultivos" as PKG_C {
+  usecase "Registrar\ncultivo"          as UC_CC
+  usecase "Eliminar\ncultivo"           as UC_CD
+}
+
+rectangle "Gestión de Lotes" as PKG_L {
+  usecase "Registrar\nlote"             as UC_LC
+  usecase "Editar\nlote"                as UC_LE
+  usecase "Eliminar\nlote"              as UC_LD
+}
+
+rectangle "Gestión de Cosechas" as PKG_H {
+  usecase "Registrar cosecha\ncompletada"         as UC_HC
+  usecase "Calcular rendimiento\nautomático (kg/ha)" as UC_CR
+  usecase "Registrar implantación\nen curso"      as UC_HI
+  usecase "Editar\ncosecha"                       as UC_HE
+  usecase "Eliminar\ncosecha"                     as UC_HD
+}
+
+rectangle "Gestión de Precios" as PKG_P {
+  usecase "Registrar / actualizar\nprecio de referencia" as UC_PC
+  usecase "Eliminar\nprecio"            as UC_PD
+}
+
+rectangle "Panel Principal" as PKG_D {
+  usecase "Consultar métricas\ny estadísticas"    as UC_DB
+}
+
+rectangle "Reportes y Analítica" as PKG_R {
+  usecase "Filtrar datos\nde cosechas"            as UC_RF
+  usecase "Generar reporte\nanalítico"            as UC_RP
+  usecase "Exportar reporte\na Excel"             as UC_EX
+  usecase "Consultar proyecciones\nde campaña"    as UC_PY
+}
+
+' ── Actor associations ────────────────────────────────────────────────────────
+
+U --> UC_CC
+U --> UC_CD
+
+U --> UC_LC
+U --> UC_LE
+U --> UC_LD
+
+U --> UC_HC
+U --> UC_HI
+U --> UC_HE
+U --> UC_HD
+
+U --> UC_PC
+U --> UC_PD
+
+U --> UC_DB
+
+U --> UC_RP
+U --> UC_EX
+
+' ── <<include>> relationships ─────────────────────────────────────────────────
+
+' Registrar cosecha completada siempre incluye el cálculo de rendimiento
+UC_HC ..> UC_CR : <<include>>
+
+' Generar reporte siempre incluye la aplicación de filtros
+UC_RP ..> UC_RF : <<include>>
+
+' Exportar a Excel requiere los datos del reporte ya calculados
+UC_EX ..> UC_RP : <<include>>
+
+' ── <<extend>> relationships ──────────────────────────────────────────────────
+
+' Registrar implantación en curso es una variante de registrar cosecha
+' donde la producción total es cero y la fecha queda sin completar
+UC_HI ..> UC_HC : <<extend>>
+
+' Las proyecciones de campaña extienden el reporte cuando existen
+' implantaciones en curso en el conjunto de datos filtrado
+UC_PY ..> UC_RP : <<extend>>
+
+' ── Notes ─────────────────────────────────────────────────────────────────────
+
+note right of UC_CR
+  El formulario deriva el rendimiento (kg/ha)
+  a partir de las toneladas ingresadas y la
+  superficie del lote seleccionado.
+  El usuario nunca ingresa kg/ha directamente.
+end note
+
+note right of UC_PY
+  Disponible sólo cuando el conjunto filtrado
+  contiene cosechas con producción = 0.
+  Usa historial del lote o promedio del cultivo
+  como base del estimado.
+end note
+
+@enduml

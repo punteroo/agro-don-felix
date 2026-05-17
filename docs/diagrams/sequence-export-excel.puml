@@ -4,6 +4,8 @@ title Secuencia: Exportar Reporte a Excel
 skinparam sequenceArrowThickness 1.5
 skinparam shadowing false
 
+!theme mimeograph
+
 actor Usuario as U
 participant "Reportes\n(Page)" as Page
 participant "cosechasService\n(Renderer)" as CosechaSvc

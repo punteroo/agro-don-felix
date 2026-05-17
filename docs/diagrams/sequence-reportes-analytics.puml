@@ -4,6 +4,8 @@ title Secuencia: Carga y cálculo analítico de Reportes
 skinparam sequenceArrowThickness 1.5
 skinparam shadowing false
 
+!theme mimeograph
+
 actor Usuario as U
 participant "Reportes\n(Page)" as Page
 participant "window.api\n(Preload Bridge)" as API

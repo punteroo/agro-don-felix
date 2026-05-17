@@ -5,6 +5,8 @@ skinparam sequenceArrowThickness 1.5
 skinparam sequenceGroupBorderThickness 1
 skinparam shadowing false
 
+!theme mimeograph
+
 actor Usuario as U
 participant "Cosechas\n(Page)" as Page
 participant "CosechaFormDialog\n(Component)" as Dialog
@@ -19,14 +21,16 @@ activate Page
 Page -> Dialog : open (lotes, cultivos)
 activate Dialog
 
-U -> Dialog : completa campos\n(lote, cultivo, temporada, rendimiento…)
+U -> Dialog : completa campos\n(lote, cultivo, temporada, producción total en tn…)
 U -> Dialog : click "Guardar"
 
 Dialog -> Dialog : validate()
 alt validación falla
   Dialog --> U : muestra errores inline
 else validación pasa
-  Dialog -> Svc : create(payload)
+  Dialog -> Dialog : rendimiento = produccion_tn × 1000 / superficie_ha\n(derivado internamente, no ingresado por el usuario)
+
+  Dialog -> Svc : create(payload con rendimiento calculado)
   activate Svc
 
   Svc -> API : window.api.cosechasCreate(payload)

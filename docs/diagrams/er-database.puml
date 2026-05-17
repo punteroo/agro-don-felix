@@ -4,6 +4,8 @@ title Diagrama ER — Base de Datos SQLite
 skinparam shadowing false
 skinparam linetype ortho
 
+!theme mimeograph
+
 entity "cultivos" as cultivos {
   * id          : INTEGER <<PK, AUTOINCREMENT>>
   --
@@ -57,6 +59,9 @@ end note
 note bottom of cosechas
   La relación con lotes tiene ON DELETE CASCADE:
   al eliminar un lote se eliminan sus cosechas.
+  rendimiento (kg/ha) es derivado por el formulario a partir
+  de la producción total en toneladas ingresada por el usuario:
+    rendimiento = produccionTn × 1000 / superficie_ha
 end note
 
 @enduml

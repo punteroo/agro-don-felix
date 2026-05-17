@@ -4,6 +4,8 @@ title Secuencia: Carga del Panel Principal (Dashboard)
 skinparam sequenceArrowThickness 1.5
 skinparam shadowing false
 
+!theme mimeograph
+
 actor Usuario as U
 participant "Dashboard\n(Page)" as Dash
 participant "window.api\n(Preload Bridge)" as API
