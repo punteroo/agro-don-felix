@@ -14,49 +14,43 @@ database "SQLite" as DB
 
 == Carga inicial ==
 
-activate Page
 Page -> Page : setLoading(true)
 
 note over Page, DB
   Cuatro consultas en paralelo con Promise.all()
 end note
 
-par Cosechas
-  Page -> API  : cosechasGetAll()
-  API  -> Handler : IPC 'cosechas:getAll'
-  Handler -> DB : SELECT c.*, l.nombre, l.superficie_ha,\ncu.nombre FROM cosechas c JOIN lotes l JOIN cultivos cu
-  DB --> Handler  : CosechaRow[]
-  Handler --> API : CosechaRow[]
-  API --> Page    : cosechas[]
-and Cultivos (para filtros)
-  Page -> API  : cultivosGetAll()
-  API  -> Handler : IPC 'cultivos:getAll'
-  Handler -> DB   : SELECT * FROM cultivos
-  DB --> Handler  : Cultivo[]
-  Handler --> API : Cultivo[]
-  API --> Page    : cultivos[]
-and Lotes (para filtros)
-  Page -> API  : lotesGetAll()
-  API  -> Handler : IPC 'lotes:getAll'
-  Handler -> DB   : SELECT l.*, COUNT(c.id), SUM(...)\nFROM lotes l LEFT JOIN cosechas c
-  DB --> Handler  : LoteRow[]
-  Handler --> API : LoteRow[]
-  API --> Page    : lotes[]
-and Historial completo de precios
-  Page -> API  : preciosGetAll()
-  API  -> Handler : IPC 'precios:getAll'
-  Handler -> DB   : SELECT p.*, c.nombre FROM precios_cache p\nJOIN cultivos c ORDER BY fecha_precio DESC
-  DB --> Handler  : PrecioCacheRow[]
-  Handler --> API : PrecioCacheRow[]
-  API --> Page    : precios[]
-end
+Page -> API  : cosechasGetAll()
+API  -> Handler : IPC 'cosechas:getAll'
+Handler -> DB : SELECT c.*, l.nombre, l.superficie_ha,\ncu.nombre FROM cosechas c JOIN lotes l JOIN cultivos cu
+DB --> Handler  : CosechaRow[]
+Handler --> API : CosechaRow[]
+API --> Page    : cosechas[]
+|||
+Page -> API  : cultivosGetAll()
+API  -> Handler : IPC 'cultivos:getAll'
+Handler -> DB   : SELECT * FROM cultivos
+DB --> Handler  : Cultivo[]
+Handler --> API : Cultivo[]
+API --> Page    : cultivos[]
+|||
+Page -> API  : lotesGetAll()
+API  -> Handler : IPC 'lotes:getAll'
+Handler -> DB   : SELECT l.*, COUNT(c.id), SUM(...)\nFROM lotes l LEFT JOIN cosechas c
+DB --> Handler  : LoteRow[]
+Handler --> API : LoteRow[]
+API --> Page    : lotes[]
+|||
+Page -> API  : preciosGetAll()
+API  -> Handler : IPC 'precios:getAll'
+Handler -> DB   : SELECT p.*, c.nombre FROM precios_cache p\nJOIN cultivos c ORDER BY fecha_precio DESC
+DB --> Handler  : PrecioCacheRow[]
+Handler --> API : PrecioCacheRow[]
+API --> Page    : precios[]
 
 Page -> Page : setLoading(false)
-deactivate Page
 
 == Cálculo analítico (en renderer, sin IPC) ==
-
-activate Page
 
 note over Page
   Todos los cálculos son derivados en memoria
@@ -81,23 +75,17 @@ Page -> Page : buildProyecciones(filtered, cosechas, latestPrecioMap)\n  para ca
 
 Page --> U : renderiza gráficos + tarjetas de proyección + preview colapsado
 
-deactivate Page
-
 == Filtrado interactivo ==
 
 U -> Page : cambia filtro (cultivo / lote / temporada)
-activate Page
 Page -> Page : recalcula filtered y todos los\ndatos de gráficos vía useMemo()
 Page --> U : actualiza gráficos sin nueva consulta
-deactivate Page
 
 == Exportación a Excel ==
 
 U -> Page : click "Exportar a Excel"
-activate Page
 Page -> Page : usa completedFiltered (excluye en curso)\ncontruye detailData[] + summaryData[]
 Page -> Page : xlsx.writeFile(workbook, filename)
 Page --> U : archivo .xlsx descargado
-deactivate Page
 
 @enduml

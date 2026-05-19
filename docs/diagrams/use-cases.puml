@@ -1,5 +1,5 @@
 @startuml use-cases
-title Diagrama de Casos de Uso — Agro Don Félix
+title Diagrama de Casos de Uso - Agro Don Félix
 
 skinparam shadowing false
 skinparam actorStyle awesome

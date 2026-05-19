@@ -1,5 +1,5 @@
 @startuml analysis-domain
-title Diagrama de Clases de Análisis — Modelo de Dominio
+title Diagrama de Clases de Análisis - Modelo de Dominio
 
 skinparam classAttributeIconSize 0
 skinparam classFontSize 12

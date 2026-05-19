@@ -1,5 +1,5 @@
 @startuml state-precio-form
-title Diagrama de Estado — PrecioFormDialog
+title Diagrama de Estado - PrecioFormDialog
 
 skinparam shadowing false
 skinparam stateFontSize 12

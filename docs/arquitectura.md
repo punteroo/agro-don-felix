@@ -1,4 +1,4 @@
-# Documentación Técnica — Agro Don Félix
+# Documentación Técnica - Agro Don Félix
 
 ---
 
@@ -61,13 +61,13 @@ Esta sección presenta los artefactos que describen el aspecto de diseño del so
 
 #### Diagrama de clases de diseño
 
-_[Diagrama: design-classes]_
+![alt text](diagrams/render/analysis-domain.png)
 
 El diagrama muestra la arquitectura en tres capas: el proceso principal con sus handlers de IPC y el acceso a SQLite, el módulo preload con la interfaz `AppAPI` expuesta al renderer, y el proceso renderer con los servicios tipados, las páginas (componentes de ruta) y los componentes de formulario reutilizables. Las dependencias entre capas siguen estrictamente la dirección renderer → preload → main, lo cual es una restricción impuesta por el modelo de seguridad de Electron. No existe ningún camino inverso: el proceso principal nunca llama directamente a código del renderer.
 
 #### Diagrama de secuencia: creación de cosecha
 
-_[Diagrama: sequence-crear-cosecha]_
+![alt text](diagrams/render/sequence-crear-cosecha.png)
 
 Este diagrama ilustra el flujo completo desde que el usuario abre el formulario de nueva cosecha hasta que el registro es persistido y la tabla se actualiza. El dato clave que el usuario ingresa es la **producción total en toneladas**; el formulario deriva automáticamente el rendimiento en kg/ha mediante la fórmula `rendimiento = produccion_tn × 1000 / superficie_ha` antes de construir el payload. El valor almacenado en la base de datos es siempre el rendimiento (kg/ha), no las toneladas ingresadas. El diagrama también muestra el manejo de la validación: si los campos obligatorios no están completos, el formulario permanece abierto y muestra mensajes de error sin invocar el IPC.
 
@@ -75,7 +75,7 @@ Un aspecto relevante del modelo de ingreso es que el usuario no registra el rend
 
 #### Diagrama de secuencia: carga analítica de Reportes
 
-_[Diagrama: sequence-reportes-analytics]_
+![alt text](diagrams/render/sequence-reportes-analytics.png)
 
 La página de Reportes combina cuatro consultas paralelas (cosechas, cultivos, lotes, historial completo de precios) con un motor de cálculo que opera íntegramente en memoria mediante `useMemo()`. Una vez recibidos los datos, se ejecutan cinco funciones puras que producen las estructuras de datos necesarias para cada visualización:
 
@@ -93,13 +93,13 @@ Todos los cálculos se recalculan automáticamente cuando el usuario modifica lo
 
 #### Diagrama de secuencia: exportación a Excel
 
-_[Diagrama: sequence-export-excel]_
+![alt text](diagrams/render/sequence-export-excel.png)
 
 La exportación a Excel es una operación completamente del lado del renderer: los datos ya se encuentran en memoria desde la carga inicial de la página. El diagrama refleja que no hay nueva consulta a SQLite en el momento de exportar; en cambio, los datos son filtrados en memoria según los criterios seleccionados por el usuario y procesados por la biblioteca `xlsx` para producir el archivo. La exportación utiliza exclusivamente las cosechas completadas (aquellas con `rendimiento > 0`), excluyendo las implantaciones en curso para evitar producir un reporte con filas de producción nula. Esto garantiza que la exportación sea instantánea incluso con grandes volúmenes de datos.
 
 #### Diagrama de secuencia: carga del panel principal
 
-_[Diagrama: sequence-dashboard-load]_
+![alt text](diagrams/render/sequence-dashboard-load.png)
 
 El panel principal realiza tres consultas en paralelo mediante `Promise.all()`: cosechas, lotes y últimos precios por cultivo. El diagrama muestra esta concurrencia de forma explícita. Una vez resueltas las tres promesas, las métricas derivadas (producción total, valor estimado, agrupamiento por cultivo para el gráfico) se calculan en el renderer sin consultas adicionales.
 
@@ -111,24 +111,24 @@ Esta sección presenta los artefactos que describen el aspecto de análisis del 
 
 #### Diagrama de casos de uso
 
-_[Diagrama: use-cases]_
+![alt text](diagrams/render/use-cases.png)
 
-El diagrama de casos de uso identifica al único actor del sistema —el Usuario operativo— y agrupa las funcionalidades en seis módulos: Gestión de Cultivos, Gestión de Lotes, Gestión de Cosechas, Gestión de Precios, Panel Principal y Reportes y Analítica. Las relaciones `<<include>>` y `<<extend>>` destacan dos invariantes clave del sistema: que el cálculo automático de rendimiento es parte inseparable del registro de toda cosecha completada, y que las proyecciones de campaña en curso son una extensión condicional del reporte analítico, activa únicamente cuando el conjunto de datos filtrado contiene implantaciones sin producción.
+El diagrama de casos de uso identifica al único actor del sistema -el Usuario operativo- y agrupa las funcionalidades en seis módulos: Gestión de Cultivos, Gestión de Lotes, Gestión de Cosechas, Gestión de Precios, Panel Principal y Reportes y Analítica. Las relaciones `<<include>>` y `<<extend>>` destacan dos invariantes clave del sistema: que el cálculo automático de rendimiento es parte inseparable del registro de toda cosecha completada, y que las proyecciones de campaña en curso son una extensión condicional del reporte analítico, activa únicamente cuando el conjunto de datos filtrado contiene implantaciones sin producción.
 
 #### Diagrama de clases de dominio
 
-_[Diagrama: analysis-domain]_
+![alt text](diagrams/render/analysis-domain.png)
 
 El modelo de dominio está compuesto por cuatro entidades: `Cultivo`, `Lote`, `Cosecha` y `PrecioCache`. La entidad central del negocio es `Cosecha`, que vincula un lote productivo con un tipo de cultivo para una temporada dada y registra el rendimiento obtenido. `PrecioCache` almacena las cotizaciones de referencia por cultivo y permite calcular el valor estimado de cada cosecha multiplicando su producción en toneladas por el precio vigente. Los atributos `cosecha_count` y `produccion_total_tn` presentes en `Lote` son valores derivados calculados mediante consultas agregadas en la base de datos, no campos almacenados.
 
 #### Diagrama ER de la base de datos
 
-_[Diagrama: er-database]_
+![alt text](diagrams/render/er-database.png)
 
 El esquema físico de SQLite refleja fielmente el modelo de dominio. Las relaciones clave a destacar son: la restricción `ON DELETE CASCADE` entre `lotes` y `cosechas`, que garantiza integridad referencial al eliminar un lote; y la restricción `UNIQUE (cultivo_id, fecha_precio)` en `precios_cache`, que garantiza una única cotización por cultivo por día y permite el upsert: si se carga una cotización para la misma fecha y cultivo que ya existe, el precio se actualiza en lugar de insertar un registro duplicado. El modo WAL (Write-Ahead Logging) está habilitado para mejorar el rendimiento de escritura concurrente.
 
 #### Diagrama de estado: formulario de registro de precio
 
-_[Diagrama: state-precio-form]_
+![alt text](diagrams/render/state-precio-form.png)
 
 El diagrama de estados modela el ciclo de vida del diálogo `PrecioFormDialog`. Se eligió este componente para el diagrama de estados por ser el que presenta mayor cantidad de transiciones de estado relevantes: el formulario puede estar cerrado, abierto en ingreso de datos, en proceso de validación, en proceso de guardado (con el botón deshabilitado para evitar doble envío), o en estado de error recuperable. La transición desde `Guardando` hacia `ErrorGuardado` regresa al estado `IngresoData` manteniendo el formulario abierto, lo que permite al usuario corregir el problema sin perder los datos ya ingresados.

@@ -56,7 +56,7 @@ else validación pasa
   Dialog -> Page : onSave() callback
   deactivate Dialog
 
-  Page -> Page : loadAll() — recarga datos
+  Page -> Page : loadAll() - recarga datos
   Page --> U : Toast "Cosecha registrada"
   deactivate Page
 end

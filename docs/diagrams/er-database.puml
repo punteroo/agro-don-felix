@@ -1,5 +1,5 @@
 @startuml er-database
-title Diagrama ER — Base de Datos SQLite
+title Diagrama ER - Base de Datos SQLite
 
 skinparam shadowing false
 skinparam linetype ortho
@@ -10,6 +10,7 @@ entity "cultivos" as cultivos {
   * id          : INTEGER <<PK, AUTOINCREMENT>>
   --
   * nombre      : TEXT <<UNIQUE, NOT NULL>>
+    deleted_at  : DATETIME <<DEFAULT NULL>>
 }
 
 entity "lotes" as lotes {
@@ -18,6 +19,7 @@ entity "lotes" as lotes {
   * nombre        : TEXT <<NOT NULL>>
     ubicacion     : TEXT
   * superficie_ha : REAL <<NOT NULL, > 0>>
+    deleted_at    : DATETIME <<DEFAULT NULL>>
 }
 
 entity "cosechas" as cosechas {
@@ -31,6 +33,7 @@ entity "cosechas" as cosechas {
     humedad_pct   : REAL
     observaciones : TEXT
   * created_at    : TEXT <<DEFAULT datetime('now')>>
+    deleted_at    : DATETIME <<DEFAULT NULL>>
 }
 
 entity "precios_cache" as precios {
@@ -42,6 +45,7 @@ entity "precios_cache" as precios {
   * fuente       : TEXT <<DEFAULT 'MATba-ROFEX'>>
   * fecha_precio : TEXT <<NOT NULL>>
   * fetched_at   : TEXT <<DEFAULT datetime('now')>>
+    deleted_at   : DATETIME <<DEFAULT NULL>>
   --
   UNIQUE (cultivo_id, fecha_precio)
 }
@@ -57,11 +61,20 @@ note bottom of precios
 end note
 
 note bottom of cosechas
-  La relación con lotes tiene ON DELETE CASCADE:
-  al eliminar un lote se eliminan sus cosechas.
+  La eliminación lógica de un lote propaga deleted_at a
+  todas sus cosechas activas (lógica de aplicación).
   rendimiento (kg/ha) es derivado por el formulario a partir
   de la producción total en toneladas ingresada por el usuario:
-    rendimiento = produccionTn × 1000 / superficie_ha
+    rendimiento = produccionTn x 1000 / superficie_ha
+end note
+
+note right of lotes
+  Patrón de eliminación lógica (soft delete):
+    deleted_at = NULL   -> registro activo
+    deleted_at = <fecha> -> registro eliminado
+  Todas las consultas filtran WHERE deleted_at IS NULL.
+  Los registros eliminados se conservan para auditoría
+  e integridad del historial productivo.
 end note
 
 @enduml

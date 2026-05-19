@@ -1,4 +1,4 @@
-# Requisitos del Sistema — Agro Don Félix
+# Requisitos del Sistema - Agro Don Félix
 
 ---
 
@@ -112,7 +112,7 @@ Los siguientes casos de uso describen los flujos de mayor complejidad o relevanc
 
 ---
 
-### CU-01 — Registrar cosecha completada
+### CU-01 - Registrar cosecha completada
 
 > **Como** usuario operativo **quiero** registrar la producción total cosechada en un lote **para** mantener el historial productivo de la empresa y obtener el rendimiento por hectárea de forma automática sin necesidad de calcularlo manualmente.
 
@@ -152,7 +152,7 @@ _B. Error de persistencia (paso 10):_ El formulario permanece abierto. Se muestr
 
 ---
 
-### CU-02 — Registrar implantación en curso
+### CU-02 - Registrar implantación en curso
 
 > **Como** usuario operativo **quiero** registrar un cultivo sembrado que todavía no fue cosechado **para** que el sistema pueda generar una proyección del valor económico esperado de esa campaña antes de que se produzca la cosecha real.
 
@@ -184,7 +184,7 @@ _A. Sin historial para ese cultivo en ningún lote (paso 6):_ El sistema registr
 
 ---
 
-### CU-03 — Registrar precio de referencia
+### CU-03 - Registrar precio de referencia
 
 > **Como** usuario operativo **quiero** cargar el precio de referencia por tonelada de un cultivo **para** que el sistema pueda estimar el valor económico de la producción registrada en el dashboard y los reportes.
 
@@ -218,7 +218,7 @@ _B. Error de persistencia (paso 5):_ El formulario permanece abierto y se muestr
 
 ---
 
-### CU-04 — Generar reporte analítico filtrado
+### CU-04 - Generar reporte analítico filtrado
 
 > **Como** usuario operativo **quiero** analizar la producción histórica filtrando por cultivo, lote y temporada **para** identificar tendencias, comparar el rendimiento entre campañas y estimar el valor del portfolio bajo distintos escenarios de precios.
 
@@ -253,7 +253,7 @@ _B. Sin precios registrados (paso 3):_ Los gráficos de valor y la tarjeta de va
 
 ---
 
-### CU-05 — Exportar reporte a Excel
+### CU-05 - Exportar reporte a Excel
 
 > **Como** usuario operativo **quiero** exportar los datos del reporte filtrado a un archivo Excel **para** compartirlos en reuniones, auditorías o análisis externos sin depender de la disponibilidad del sistema ni de conocimientos técnicos del destinatario.
 
@@ -284,7 +284,7 @@ _A. Sin cosechas completadas en el filtro actual:_ El botón permanece deshabili
 
 ---
 
-### CU-06 — Consultar proyecciones de campaña en curso
+### CU-06 - Consultar proyecciones de campaña en curso
 
 > **Como** usuario operativo **quiero** ver una estimación del valor económico esperado de los cultivos sembrados que todavía no se cosecharon **para** anticipar el resultado de la campaña y apoyar decisiones de comercialización antes del cierre productivo.
 

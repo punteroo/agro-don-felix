@@ -22,28 +22,26 @@ note over Dash, DB
   con Promise.all()
 end note
 
-par Consulta cosechas
-  Dash -> API : cosechasGetAll()
-  API -> Handler : IPC 'cosechas:getAll'
-  Handler -> DB : SELECT c.*, l.nombre, cu.nombre, l.superficie_ha\nFROM cosechas c JOIN lotes l JOIN cultivos cu
-  DB --> Handler : CosechaRow[]
-  Handler --> API : CosechaRow[]
-  API --> Dash : cosechas[]
-and Consulta lotes
-  Dash -> API : lotesGetAll()
-  API -> Handler : IPC 'lotes:getAll'
-  Handler -> DB : SELECT l.*, COUNT(c.id), SUM(c.rendimiento * l.superficie_ha / 1000)\nFROM lotes l LEFT JOIN cosechas c
-  DB --> Handler : LoteRow[]
-  Handler --> API : LoteRow[]
-  API --> Dash : lotes[]
-and Consulta último precio por cultivo
-  Dash -> API : preciosGetLatest()
-  API -> Handler : IPC 'precios:getLatest'
-  Handler -> DB : SELECT p.*, c.nombre FROM precios_cache p\nJOIN cultivos c WHERE fetched_at = MAX(fetched_at)
-  DB --> Handler : PrecioCacheRow[]
-  Handler --> API : PrecioCacheRow[]
-  API --> Dash : precios[]
-end
+Dash -> API : cosechasGetAll()
+API -> Handler : IPC 'cosechas:getAll'
+Handler -> DB : SELECT c.*, l.nombre, cu.nombre, l.superficie_ha\nFROM cosechas c JOIN lotes l JOIN cultivos cu
+DB --> Handler : CosechaRow[]
+Handler --> API : CosechaRow[]
+API --> Dash : cosechas[]
+|||
+Dash -> API : lotesGetAll()
+API -> Handler : IPC 'lotes:getAll'
+Handler -> DB : SELECT l.*, COUNT(c.id), SUM(c.rendimiento * l.superficie_ha / 1000)\nFROM lotes l LEFT JOIN cosechas c
+DB --> Handler : LoteRow[]
+Handler --> API : LoteRow[]
+API --> Dash : lotes[]
+|||
+Dash -> API : preciosGetLatest()
+API -> Handler : IPC 'precios:getLatest'
+Handler -> DB : SELECT p.*, c.nombre FROM precios_cache p\nJOIN cultivos c WHERE fetched_at = MAX(fetched_at)
+DB --> Handler : PrecioCacheRow[]
+Handler --> API : PrecioCacheRow[]
+API --> Dash : precios[]
 
 Dash -> Dash : calcula métricas derivadas\n(producción total, valor estimado,\nproducción por cultivo)
 Dash -> Dash : setLoading(false)

@@ -82,7 +82,7 @@ package "Preload (Context Bridge)" {
   }
 }
 
-' ── Renderer — Services ───────────────────────────────────────────────────────
+' ── Renderer - Services ───────────────────────────────────────────────────────
 
 package "Proceso Renderer (React / Vite)" {
 
