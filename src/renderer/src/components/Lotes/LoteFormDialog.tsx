@@ -198,7 +198,7 @@ export default function LoteFormDialog({ visible, onHide, onSave, lote }: Props)
           )}
         </div>
 
-        {/* Ubicación — Departamento */}
+        {/* Ubicación - Departamento */}
         <div className="field col-12 md:col-6">
           <label className="font-semibold mb-1 block">Departamento</label>
           <Dropdown
@@ -216,7 +216,7 @@ export default function LoteFormDialog({ visible, onHide, onSave, lote }: Props)
           />
         </div>
 
-        {/* Ubicación — Localidad */}
+        {/* Ubicación - Localidad */}
         <div className="field col-12 md:col-6">
           <label className="font-semibold mb-1 block">Localidad</label>
           <Dropdown

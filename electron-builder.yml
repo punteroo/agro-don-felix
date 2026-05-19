@@ -10,7 +10,7 @@ files:
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml,yarn.lock}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
-  # better-sqlite3 is a native module — it must be unpacked from the ASAR archive
+  # better-sqlite3 is a native module - it must be unpacked from the ASAR archive
   - resources/**
   - node_modules/better-sqlite3/**
   - node_modules/bindings/**

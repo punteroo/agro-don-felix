@@ -99,7 +99,7 @@ export default function Configuracion() {
               El sistema registra la producción de los lotes y calcula el rendimiento por
               hectárea a partir de las toneladas cosechadas.{' '}
               <span style={{ color: 'var(--text-color-secondary)' }}>
-                Temporada 2024/2025 — Soja, Maíz, Trigo.
+                Temporada 2024/2025 - Soja, Maíz, Trigo.
               </span>
             </p>
           </div>

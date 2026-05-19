@@ -1,6 +1,6 @@
 /**
  * Shared domain types for the renderer process.
- * Keep these in sync with src/preload/index.d.ts — they are intentionally
+ * Keep these in sync with src/preload/index.d.ts - they are intentionally
  * separate so the renderer never imports from the Electron-only preload entry.
  */
 
@@ -16,7 +16,7 @@ export interface Lote {
   superficie_ha: number
 }
 
-/** Lote as returned by lotes:getAll — includes aggregate stats from cosechas. */
+/** Lote as returned by lotes:getAll - includes aggregate stats from cosechas. */
 export interface LoteRow extends Lote {
   cosecha_count: number
   produccion_total_tn: number

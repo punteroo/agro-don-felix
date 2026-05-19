@@ -59,7 +59,7 @@ export default function Precios() {
   const latestIdPerCultivo = new Set<number>()
   const seen = new Set<number>()
   for (const p of precios) {
-    // precios come ordered by fecha_precio DESC — first occurrence per cultivo_id is latest
+    // precios come ordered by fecha_precio DESC - first occurrence per cultivo_id is latest
     if (!seen.has(p.cultivo_id)) {
       latestIdPerCultivo.add(p.id)
       seen.add(p.cultivo_id)

@@ -4,7 +4,7 @@
 @import 'primeicons/primeicons.css';
 @import 'primeflex/primeflex.css';
 
-/* ── Design tokens — light (default) ────────────────────────────────────── */
+/* ── Design tokens - light (default) ────────────────────────────────────── */
 :root {
   /* Brand palette */
   --brand:           #2e7d32;
@@ -15,7 +15,7 @@
   /* Page layout */
   --page-bg:         #f4f7f4;
 
-  /* Sidebar — intentionally dark in both modes */
+  /* Sidebar - intentionally dark in both modes */
   --sidebar-bg:          #1a2e1a;
   --sidebar-border:      rgba(255, 255, 255, 0.08);
   --sidebar-text:        rgba(200, 230, 201, 0.7);
@@ -37,7 +37,7 @@
   --theme-transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* ── Design tokens — dark ───────────────────────────────────────────────── */
+/* ── Design tokens - dark ───────────────────────────────────────────────── */
 [data-theme='dark'] {
   --page-bg:      #141a14;
   --topbar-bg:    #1e271e;
@@ -45,7 +45,7 @@
   --card-bg:      #1e271e;
   --card-border:  #2d3d2d;
 
-  /* PrimeReact surface overrides — cascades to all p-* components */
+  /* PrimeReact surface overrides - cascades to all p-* components */
   --surface-0:       #1e271e;
   --surface-50:      #232d23;
   --surface-100:     #2d3d2d;
@@ -97,7 +97,7 @@ html {
   font-size: 15px;
 }
 
-/* ── Font size scale — data attribute set by SettingsContext ─────────────── */
+/* ── Font size scale - data attribute set by SettingsContext ─────────────── */
 html[data-font-size='small']  { font-size: 13px; }
 html[data-font-size='normal'] { font-size: 15px; }
 html[data-font-size='large']  { font-size: 18px; }
@@ -349,7 +349,7 @@ html[data-font-size='xlarge'] { font-size: 21px; }
   white-space: nowrap;
 }
 
-/* ── PrimeReact card override — adapt to our surface tokens ─────────────── */
+/* ── PrimeReact card override - adapt to our surface tokens ─────────────── */
 .card.surface-0 {
   background: var(--card-bg) !important;
   border: 1px solid var(--card-border) !important;

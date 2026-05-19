@@ -57,7 +57,7 @@ interface FormErrors {
 interface Props {
   visible: boolean
   onHide: () => void
-  /** Parent calls the IPC and shows Toast — returns on success, throws on error */
+  /** Parent calls the IPC and shows Toast - returns on success, throws on error */
   onSave: (payload: CosechaPayload, editId?: number) => Promise<void>
   /** When set the dialog is in edit mode */
   cosecha?: CosechaRow | null

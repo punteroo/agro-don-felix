@@ -70,7 +70,7 @@ function formatFechaCorta(iso: string): string {
 }
 
 function formatDate(iso: string | undefined): string {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const [y, m, d] = iso.split('-').map(Number)
   return new Date(y, m - 1, d).toLocaleDateString('es-AR')
 }
@@ -287,7 +287,7 @@ export default function Reportes() {
 
   const completedFiltered = useMemo(() => filtered.filter((c) => c.rendimiento > 0), [filtered])
 
-  // Latest price per cultivo (precios come sorted DESC from IPC — first occurrence is latest)
+  // Latest price per cultivo (precios come sorted DESC from IPC - first occurrence is latest)
   const latestPrecioMap = useMemo(() => {
     const map = new Map<number, number>()
     for (const p of precios)
@@ -433,7 +433,7 @@ export default function Reportes() {
   )
   const valorTemplate = (row: CosechaRow) => {
     const precio = latestPrecioMap.get(row.cultivo_id)
-    if (!precio) return <span style={{ color: 'var(--text-color-secondary)' }}>—</span>
+    if (!precio) return <span style={{ color: 'var(--text-color-secondary)' }}>-</span>
     const valor = calcProduccionTn(row) * precio
     return (
       <div className="flex flex-column" style={{ alignItems: 'flex-end', gap: '0.1rem' }}>
@@ -506,7 +506,7 @@ export default function Reportes() {
         </div>
       </div>
 
-      {/* Analytics — only when there is data */}
+      {/* Analytics - only when there is data */}
       {cosechas.length > 0 && (
         <>
           {/* Summary stat cards */}
@@ -686,7 +686,7 @@ export default function Reportes() {
             </motion.div>
           )}
 
-          {/* Rendimiento por lote — horizontal grouped bar */}
+          {/* Rendimiento por lote - horizontal grouped bar */}
           {hasChartData && rendimientoPorLote.length > 0 && (
             <motion.div variants={sectionVariant} initial="hidden" animate="visible">
               <ChartCard title="Rendimiento promedio por lote (kg/ha)">
@@ -747,7 +747,7 @@ export default function Reportes() {
                     Proyección de campaña en curso
                   </span>
                   <span style={{ fontSize: '0.78rem', color: 'var(--text-color-secondary)' }}>
-                    — rendimiento estimado en base a historial, precio de referencia actual
+                    - rendimiento estimado en base a historial, precio de referencia actual
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-3">
@@ -818,7 +818,7 @@ export default function Reportes() {
         </>
       )}
 
-      {/* Data preview — collapsible, export always visible */}
+      {/* Data preview - collapsible, export always visible */}
       <motion.div
         className="card surface-0 border-round-lg shadow-1"
         style={{ padding: '1rem' }}

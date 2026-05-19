@@ -1,6 +1,6 @@
 /**
  * Typed wrappers around window.api (the contextBridge-exposed IPC bridge).
- * Import from this file inside React components — never call window.api directly.
+ * Import from this file inside React components - never call window.api directly.
  */
 
 export const cultivosService = {

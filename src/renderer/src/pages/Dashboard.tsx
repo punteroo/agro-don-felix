@@ -177,7 +177,7 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Stats row — staggered entrance */}
+      {/* Stats row - staggered entrance */}
       <motion.div
         className="flex flex-wrap gap-3"
         variants={statsContainer}

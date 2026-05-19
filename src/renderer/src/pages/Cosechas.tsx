@@ -16,7 +16,7 @@ import type { CosechaRow, CosechaPayload, Lote, Cultivo } from '../types/domain'
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatDate(iso: string | undefined): string {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const [y, m, d] = iso.split('-').map(Number)
   return new Date(y, m - 1, d).toLocaleDateString('es-AR')
 }
@@ -183,7 +183,7 @@ export default function Cosechas() {
   }
 
   const humedadTemplate = (row: CosechaRow) =>
-    row.humedad_pct != null ? `${row.humedad_pct}%` : '—'
+    row.humedad_pct != null ? `${row.humedad_pct}%` : '-'
 
   const accionesTemplate = (row: CosechaRow) => (
     <div className="flex gap-2 justify-content-center">

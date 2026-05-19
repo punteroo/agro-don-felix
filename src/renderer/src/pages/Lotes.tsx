@@ -149,7 +149,7 @@ export default function Lotes() {
         {row.ubicacion}
       </span>
     ) : (
-      <span className="text-400">—</span>
+      <span className="text-400">-</span>
     )
 
   const cosechaCountTemplate = (row: LoteRow) =>
@@ -169,7 +169,7 @@ export default function Lotes() {
         {row.produccion_total_tn.toLocaleString('es-AR', { maximumFractionDigits: 2 })} tn
       </span>
     ) : (
-      <span className="text-400">—</span>
+      <span className="text-400">-</span>
     )
 
   const accionesTemplate = (row: LoteRow) => (
